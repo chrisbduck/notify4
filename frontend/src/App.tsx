@@ -37,7 +37,7 @@ const App: FC = () => {
     return (
         <div className="container">
             <h1>Notify4 - Backend Test</h1>
-            <p className="subtitle">Testing Flask API endpoints from React (TypeScript)</p>
+            <p className="subtitle">Testing Flask API endpoints from React (TypeScript version)</p>
 
             <div className="button-group">
                 <button onClick={handleCallTest1} disabled={loading}>

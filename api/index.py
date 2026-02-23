@@ -13,7 +13,7 @@ def test_endpoint_1():
         "message": "Test endpoint 1 is working!",
         "data": {
             "test": "endpoint1",
-            "timestamp": "2026-02-22T12:00:00Z"
+            "timestamp": "2026-02-22T12:34:56Z"
         }
     })
 
@@ -27,7 +27,7 @@ def test_endpoint_2():
         "data": {
             "test": "endpoint2",
             "count": 42,
-            "items": ["apple", "banana", "orange"]
+            "items": ["apple", "banana", "orange", "grape"]
         }
     })
 
