@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+*.local
+dist/
+dist-ssr/
+*.sw[opqrst]
+*.sw[opqrst][a-z]
+*.swpx
+*~
+.parcel-cache
+.cache
