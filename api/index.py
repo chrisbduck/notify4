@@ -1,13 +1,24 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+import logging
+import sys
 
 app = Flask(__name__)
 CORS(app)
+
+# Configure logging to stdout so logs are visible in Vercel
+logger = logging.getLogger("notify4")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    logger.addHandler(handler)
 
 
 @app.route("/api/test1", methods=["GET"])
 def test_endpoint_1():
     """First test endpoint"""
+    logger.info("/api/test1 called - TEST PHRASE: test-endpoint-1-phrase")
     return jsonify({
         "status": "success",
         "message": "Test endpoint 1 is working!",
@@ -21,6 +32,7 @@ def test_endpoint_1():
 @app.route("/api/test2", methods=["GET"])
 def test_endpoint_2():
     """Second test endpoint"""
+    logger.info("/api/test2 called - TEST PHRASE: test-endpoint-2-phrase")
     return jsonify({
         "status": "success",
         "message": "Test endpoint 2 is working!",
