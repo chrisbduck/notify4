@@ -1,19 +1,24 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import logging
-import sys
+try:
+    import logging
+    import sys
+except Exception as e:
+    raise RuntimeError(f"Error importing logging or sys: {e}")
 
 app = Flask(__name__)
 CORS(app)
 
 # Configure logging to stdout so logs are visible in Vercel
-logger = logging.getLogger("notify4")
-logger.setLevel(logging.INFO)
-if not logger.handlers:
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
-    logger.addHandler(handler)
-
+try:
+    logger = logging.getLogger("notify4")
+    logger.setLevel(logging.INFO)
+    if not logger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+        logger.addHandler(handler)
+except Exception as e:
+    raise RuntimeError(f"Error setting up logging: {e}")
 
 @app.route("/api/test1", methods=["GET"])
 def test_endpoint_1():
