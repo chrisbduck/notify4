@@ -1,15 +1,14 @@
+import logging
+import sys
+
 from flask import Flask, jsonify
 from flask_cors import CORS
-try:
-    import logging
-    import sys
-except Exception as e:
-    raise RuntimeError(f"Error importing logging or sys: {e}")
+import requests
 
 app = Flask(__name__)
 CORS(app)
 
-def config_logging() -> logging.Logger:
+def _configure_logging() -> logging.Logger:
     "Configures logging to stdout so logs are visible in Vercel."
     try:
         logger = logging.getLogger("notify4")
@@ -22,7 +21,7 @@ def config_logging() -> logging.Logger:
     except Exception as e:
         raise RuntimeError(f"Error setting up logging: {e}")
 
-logger = config_logging()
+logger = _configure_logging()
 
 @app.route("/api/test1", methods=["GET"])
 def test_endpoint_1():
@@ -57,6 +56,20 @@ def test_endpoint_2():
 def health_check():
     """Health check endpoint"""
     return jsonify({"status": "healthy"})
+
+
+@app.route("/api/download-alerts", methods=["GET"])
+def download_alerts():
+    """Download and log alerts from S3"""
+    url = "https://s3.amazonaws.com/st-service-alerts-prod/alerts_pb.json"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        logger.info("Downloaded alerts content: %s", response.text)
+        return jsonify({"status": "success", "message": "Alerts downloaded and logged successfully"})
+    except requests.RequestException as e:
+        logger.error(f"Failed to download alerts: {e}")
+        return jsonify({"status": "error", "message": f"Failed to download alerts: {str(e)}"}), 500
 
 
 if __name__ == "__main__":

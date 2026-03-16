@@ -10,6 +10,7 @@ interface ApiResponse {
 const App: FC = () => {
     const [test1Result, setTest1Result] = useState<ApiResponse | null>(null)
     const [test2Result, setTest2Result] = useState<ApiResponse | null>(null)
+    const [test3Result, setTest3Result] = useState<ApiResponse | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -33,6 +34,7 @@ const App: FC = () => {
 
     const handleCallTest1 = () => callEndpoint('test1', setTest1Result)
     const handleCallTest2 = () => callEndpoint('test2', setTest2Result)
+    const handleCallTest3 = () => callEndpoint('download-alerts', setTest3Result)
 
     return (
         <div className="container">
@@ -45,6 +47,9 @@ const App: FC = () => {
                 </button>
                 <button onClick={handleCallTest2} disabled={loading}>
                     Call Test Endpoint 2
+                </button>
+                <button onClick={handleCallTest3} disabled={loading}>
+                    Call Download Alerts Endpoint
                 </button>
             </div>
 
@@ -64,7 +69,14 @@ const App: FC = () => {
                 </div>
             )}
 
-            {!test1Result && !test2Result && !error && (
+            {test3Result && (
+                <div className="result">
+                    <h2>Download Alerts Result</h2>
+                    <pre>{JSON.stringify(test3Result, null, 2)}</pre>
+                </div>
+            )}
+
+            {!test1Result && !test2Result && !test3Result && !error && (
                 <div className="placeholder">
                     Click a button to call a backend endpoint
                 </div>
