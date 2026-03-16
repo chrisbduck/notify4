@@ -9,16 +9,20 @@ except Exception as e:
 app = Flask(__name__)
 CORS(app)
 
-# Configure logging to stdout so logs are visible in Vercel
-try:
-    logger = logging.getLogger("notify4")
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
-        logger.addHandler(handler)
-except Exception as e:
-    raise RuntimeError(f"Error setting up logging: {e}")
+def config_logging() -> logging.Logger:
+    "Configures logging to stdout so logs are visible in Vercel."
+    try:
+        logger = logging.getLogger("notify4")
+        logger.setLevel(logging.INFO)
+        if not logger.handlers:
+            handler = logging.StreamHandler(sys.stdout)
+            handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+            logger.addHandler(handler)
+        return logger
+    except Exception as e:
+        raise RuntimeError(f"Error setting up logging: {e}")
+
+logger = config_logging()
 
 @app.route("/api/test1", methods=["GET"])
 def test_endpoint_1():
