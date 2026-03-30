@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Notify4 Seattle alerts favicon">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#1f2937" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)" />
+  <circle cx="47" cy="17" r="6" fill="#65c466" />
+  <path
+    d="M32 10
+       L37 20
+       H27
+       Z"
+    fill="#fbbf24"
+  />
+  <path
+    d="M31 20
+       H33
+       L35.2 41
+       H28.8
+       Z"
+    fill="#f3f4f6"
+  />
+  <path
+    d="M23 24
+       H41
+       L44 28
+       H20
+       Z"
+    fill="#f3f4f6"
+  />
+  <path
+    d="M17 46
+       C21 40, 28 37, 32 37
+       C36 37, 43 40, 47 46"
+    fill="none"
+    stroke="#f3f4f6"
+    stroke-linecap="round"
+    stroke-width="3"
+  />
+  <path
+    d="M24 43 L21 52
+       M32 42 L29 54
+       M40 43 L37 52"
+    fill="none"
+    stroke="#60a5fa"
+    stroke-linecap="round"
+    stroke-width="3"
+  />
+</svg>
