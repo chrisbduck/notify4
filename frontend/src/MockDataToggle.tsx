@@ -1,28 +1,23 @@
 import React from 'react';
 
 interface MockDataToggleProps {
-    useHook: () => readonly [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+    enabled: boolean;
+    onToggle: () => void;
     label: string;
 }
 
-export const MockDataToggle: React.FC<MockDataToggleProps> = ({ useHook, label }) => {
-    const [useMockData, setUseMockData] = useHook();
+export const MockDataToggle: React.FC<MockDataToggleProps> = ({ enabled, onToggle, label }) => {
     const isLocalHost = window.location.href.includes('localhost');
 
     if (!isLocalHost) return null;
 
-    const toggleMockData = () => {
-        setUseMockData(value => !value);
-        window.location.reload();
-    };
-
     return (
         <button
-            onClick={toggleMockData}
+            onClick={onToggle}
             style={{
                 padding: '8px 12px',
-                backgroundColor: useMockData ? '#f8d7da' : '#d4edda',
-                color: useMockData ? '#721c24' : '#155724',
+                backgroundColor: enabled ? '#f8d7da' : '#d4edda',
+                color: enabled ? '#721c24' : '#155724',
                 border: '1px solid currentColor',
                 borderRadius: '4px',
                 cursor: 'pointer',
@@ -31,7 +26,7 @@ export const MockDataToggle: React.FC<MockDataToggleProps> = ({ useHook, label }
                 fontSize: '14px',
             }}
         >
-            {useMockData ? `Disable ${label}` : `Enable ${label}`}
+            {enabled ? `Disable ${label}` : `Enable ${label}`}
         </button>
     );
 };

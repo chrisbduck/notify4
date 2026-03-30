@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getAqiDataForLocation, type AqiData } from './aqiService';
 import AqiCard from './AqiCard';
 import './AqiDisplay.css';
@@ -23,10 +23,8 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
     const [mtAqi, setMtAqi] = useState<AqiData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isExpanded, setIsExpanded] = useState(false);
-    const effectRan = useRef(false);
 
     useEffect(() => {
-        if (effectRan.current) return;
         const fetchAqiData = async () => {
             setIsLoading(true);
             const [nkData, sdData, mtData] = await Promise.all([
@@ -42,7 +40,6 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
 
         fetchAqiData();
         const interval = setInterval(fetchAqiData, 300000); // Refresh every 5 minutes
-        effectRan.current = true;
 
         return () => clearInterval(interval);
     }, [mockData]);

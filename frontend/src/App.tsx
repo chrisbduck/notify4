@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import './App.css';
 import WeatherCardDisplay from './WeatherCardDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
@@ -19,16 +19,26 @@ interface EndpointResult {
     error?: string;
 }
 
+const ADMIN_PANEL_STORAGE_KEY = 'notify4AdminPanelExpanded';
+
 function AdminTestingPanel({
     shouldUseMockTransitData,
     shouldUseMockWeatherData,
     shouldUseMockAQIData,
+    onToggleTransitMock,
+    onToggleWeatherMock,
+    onToggleAqiMock,
 }: {
     shouldUseMockTransitData: boolean;
     shouldUseMockWeatherData: boolean;
     shouldUseMockAQIData: boolean;
+    onToggleTransitMock: () => void;
+    onToggleWeatherMock: () => void;
+    onToggleAqiMock: () => void;
 }) {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState<boolean>(() => {
+        return localStorage.getItem(ADMIN_PANEL_STORAGE_KEY) === 'true';
+    });
     const [results, setResults] = useState<Record<string, EndpointResult>>({
         test1: { status: 'idle', label: 'Test endpoint' },
         downloadAlerts: { status: 'idle', label: 'Download alerts' },
@@ -36,6 +46,10 @@ function AdminTestingPanel({
     });
 
     const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    useEffect(() => {
+        localStorage.setItem(ADMIN_PANEL_STORAGE_KEY, String(isExpanded));
+    }, [isExpanded]);
 
     const callEndpoint = async (key: string, label: string, path: string) => {
         setResults((current) => ({
@@ -118,9 +132,21 @@ function AdminTestingPanel({
                                 <p>These toggles are only available on localhost.</p>
                             </div>
                             <div className="mock-toggle-row">
-                                <MockDataToggle useHook={useShouldUseMockTransitData} label="Mock Transit Data" />
-                                <MockDataToggle useHook={useShouldUseMockWeatherData} label="Mock Weather Data" />
-                                <MockDataToggle useHook={useShouldUseMockAQIData} label="Mock AQI Data" />
+                                <MockDataToggle
+                                    enabled={shouldUseMockTransitData}
+                                    onToggle={onToggleTransitMock}
+                                    label="Mock Transit Data"
+                                />
+                                <MockDataToggle
+                                    enabled={shouldUseMockWeatherData}
+                                    onToggle={onToggleWeatherMock}
+                                    label="Mock Weather Data"
+                                />
+                                <MockDataToggle
+                                    enabled={shouldUseMockAQIData}
+                                    onToggle={onToggleAqiMock}
+                                    label="Mock AQI Data"
+                                />
                             </div>
                             <div className="mock-state-summary">
                                 <span>Transit: {shouldUseMockTransitData ? 'mock' : 'live'}</span>
@@ -140,9 +166,9 @@ function App() {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [lastFetched, setLastFetched] = useState<string | null>(null);
-    const [shouldUseMockTransitData] = useShouldUseMockTransitData();
-    const [shouldUseMockWeatherData] = useShouldUseMockWeatherData();
-    const [shouldUseMockAQIData] = useShouldUseMockAQIData();
+    const [shouldUseMockTransitData, setShouldUseMockTransitData] = useShouldUseMockTransitData();
+    const [shouldUseMockWeatherData, setShouldUseMockWeatherData] = useShouldUseMockWeatherData();
+    const [shouldUseMockAQIData, setShouldUseMockAQIData] = useShouldUseMockAQIData();
 
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
     const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -196,6 +222,9 @@ function App() {
                 shouldUseMockTransitData={shouldUseMockTransitData}
                 shouldUseMockWeatherData={shouldUseMockWeatherData}
                 shouldUseMockAQIData={shouldUseMockAQIData}
+                onToggleTransitMock={() => setShouldUseMockTransitData((value) => !value)}
+                onToggleWeatherMock={() => setShouldUseMockWeatherData((value) => !value)}
+                onToggleAqiMock={() => setShouldUseMockAQIData((value) => !value)}
             />
 
             <section className="main-content-cards">

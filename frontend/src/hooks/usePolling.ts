@@ -15,6 +15,7 @@ export const usePolling = (pollingFunction: PollingFunction, interval: number = 
     }, [pollingFunction, interval]);
 
     useEffect(() => {
+        lastFetchTimestamp.current = 0;
         executePolling(); // Initial fetch
 
         const startInterval = () => {

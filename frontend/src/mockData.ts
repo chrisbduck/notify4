@@ -10,9 +10,11 @@ export function useMockData(key: string) {
     });
 
     const setAndSave = (newValue: boolean | ((prev: boolean) => boolean)) => {
-        const nextValue = typeof newValue === 'function' ? newValue(value) : newValue;
-        localStorage.setItem(key, String(nextValue));
-        setValue(nextValue);
+        setValue((currentValue) => {
+            const nextValue = typeof newValue === 'function' ? newValue(currentValue) : newValue;
+            localStorage.setItem(key, String(nextValue));
+            return nextValue;
+        });
     };
 
     return [value, setAndSave] as const;
