@@ -23,6 +23,18 @@ function MinMaxTemperatureDisplay({ minTemperature, maxTemperature, temperatureU
     return <p>Min/Max: {minTemperature}°{temperatureUnit} / {maxTemperature}°{temperatureUnit}</p>;
 }
 
+function WindAlertBanner({ maxWindSpeed }: { maxWindSpeed?: number }) {
+    if (maxWindSpeed === undefined || maxWindSpeed < 31) return null;
+
+    const description = getWindDescription(maxWindSpeed);
+    return (
+        <div className="weather-alert-banner" role="status" aria-live="polite">
+            <span className="weather-alert-label">Wind Alert</span>
+            <span className="weather-alert-text">{description} gusts up to {maxWindSpeed.toFixed(1)} mph</span>
+        </div>
+    );
+}
+
 function WindDisplay({ averageWindSpeed, maxWindSpeed }: { averageWindSpeed?: number; maxWindSpeed?: number }) {
     if (averageWindSpeed === undefined || maxWindSpeed === undefined) return null;
     if (maxWindSpeed < 20) return null; // don't display anything for light winds
@@ -55,6 +67,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
     return (
         <div className="weather-card">
             <h3 className="weather-title">{city}</h3>
+            <WindAlertBanner maxWindSpeed={currentWeather.maxWindSpeed} />
             <div className="weather-details-container">
                 <div className="weather-details-column">
                     <h4>Now</h4>
