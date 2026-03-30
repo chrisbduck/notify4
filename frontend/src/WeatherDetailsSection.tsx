@@ -1,4 +1,4 @@
-import { isBefore2PM, type WeatherData, formatPrecipitationType, getWindDescription } from "./weatherService";
+import { isBefore2PM, type WeatherData, formatForecastText, formatPrecipitationType, getWindDescription } from "./weatherService";
 import TableDisplay, { type TableAttribute } from "./TableDisplay";
 
 export function WeatherDetailsSection({ currentWeather, forecast4pm }: { currentWeather: WeatherData | null, forecast4pm: WeatherData | null }) {
@@ -9,7 +9,7 @@ export function WeatherDetailsSection({ currentWeather, forecast4pm }: { current
         },
         {
             label: 'Forecast',
-            render: (weather: WeatherData) => weather.shortForecast,
+            render: (weather: WeatherData) => formatForecastText(weather.shortForecast),
         },
         {
             label: 'Wind',

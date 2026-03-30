@@ -252,6 +252,25 @@ export const formatPrecipitationType = (type: string | undefined): string => {
     }
 };
 
+export const formatForecastText = (forecast: string | undefined): string => {
+    if (!forecast) return 'N/A';
+
+    switch (forecast.toLowerCase()) {
+        case 'rain_showers':
+            return 'Showers';
+        case 'light_rain':
+            return 'Light Rain';
+        case 'heavy_rain':
+            return 'Heavy Rain';
+        case 'freezing_rain':
+            return 'Freezing Rain';
+        default:
+            return forecast
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+};
+
 export function getWindDescription(maxSpeed: number): string {
     if (maxSpeed < 1) return 'Calm';
     if (maxSpeed <= 3) return 'Light air';

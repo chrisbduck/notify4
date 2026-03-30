@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatPrecipitationType, getWindDescription, type WeatherData } from './weatherService';
+import { formatForecastText, formatPrecipitationType, getWindDescription, type WeatherData } from './weatherService';
 import './WeatherCardDisplay.css';
 import { WeatherIcon } from './WeatherIcon';
 
@@ -14,7 +14,7 @@ const WeatherDetails: React.FC<WeatherDetailsProps> = ({ icon, temperature, temp
     <div className="weather-details">
         <WeatherIcon iconName={icon} className="weather-icon" />
         <p>{temperature}°{temperatureUnit}</p>
-        <p>{shortForecast}</p>
+        <p>{formatForecastText(shortForecast)}</p>
     </div>
 );
 
