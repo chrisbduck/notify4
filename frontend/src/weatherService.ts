@@ -70,6 +70,10 @@ interface GridpointResponse {
     };
 }
 
+interface ValidTimeCarrier {
+    validTime: string;
+}
+
 export interface WeatherData {
     city: string;
     temperature: number;
@@ -108,6 +112,47 @@ const parseDuration = (duration: string): number => {
 
 const convertCelsiusToFahrenheit = (celsius: number): number => {
     return (celsius * 9 / 5) + 32;
+};
+
+const getRangeEnd = (validTime: string): Date => {
+    const [timeStr, durationStr] = validTime.split('/');
+    const validTimeStart = new Date(timeStr);
+    return new Date(validTimeStart.getTime() + parseDuration(durationStr));
+};
+
+const getFirstAvailableTime = (entries: ValidTimeCarrier[]): Date | null => {
+    if (entries.length === 0) return null;
+    return new Date(entries[0].validTime.split('/')[0]);
+};
+
+const getLastAvailableTime = (entries: ValidTimeCarrier[]): Date | null => {
+    if (entries.length === 0) return null;
+    return getRangeEnd(entries[entries.length - 1].validTime);
+};
+
+const clampMockTargetTime = (
+    targetTime: Date,
+    properties: GridpointResponse['properties'],
+    useMockData: boolean,
+): Date => {
+    if (!useMockData) return targetTime;
+
+    const entries = properties.temperature.values;
+    const firstAvailable = getFirstAvailableTime(entries);
+    const lastAvailable = getLastAvailableTime(entries);
+    if (!firstAvailable || !lastAvailable) return targetTime;
+
+    const remapped = new Date(firstAvailable);
+    remapped.setHours(
+        targetTime.getHours(),
+        targetTime.getMinutes(),
+        targetTime.getSeconds(),
+        targetTime.getMilliseconds(),
+    );
+
+    if (remapped < firstAvailable) return firstAvailable;
+    if (remapped > lastAvailable) return lastAvailable;
+    return remapped;
 };
 
 const getWeatherDetailsAtTime = (
@@ -263,16 +308,17 @@ const fetchWeatherData = async (latitude: number, longitude: number, useMockData
 
         const city = pointData.properties.relativeLocation.properties.city;
         const properties = gridpointData.properties;
-        const today = targetTime.toISOString().split('T')[0];
+        const effectiveTargetTime = clampMockTargetTime(targetTime, properties, useMockData);
+        const today = effectiveTargetTime.toISOString().split('T')[0];
 
-        const { temperature, shortForecast, icon } = getWeatherDetailsAtTime(properties, targetTime);
+        const { temperature, shortForecast, icon } = getWeatherDetailsAtTime(properties, effectiveTargetTime);
 
         const getSpecificValue = (values: GridpointValue[]): number | undefined => {
             for (const item of values) {
                 const [timeStr, durationStr] = item.validTime.split('/');
                 const validTimeStart = new Date(timeStr);
                 const validTimeEnd = new Date(validTimeStart.getTime() + parseDuration(durationStr));
-                if (targetTime >= validTimeStart && targetTime < validTimeEnd) {
+                if (effectiveTargetTime >= validTimeStart && effectiveTargetTime < validTimeEnd) {
                     return item.value !== null ? item.value : undefined;
                 }
             }
