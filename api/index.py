@@ -2,11 +2,21 @@ import logging
 import os
 import sys
 import time
+from pathlib import Path
 from typing import Dict, Literal, Optional, Union
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from dotenv import load_dotenv
 import requests
+
+def _configure_environment():
+    project_root = Path(__file__).resolve().parent.parent
+    load_dotenv(project_root / ".env.local")
+    load_dotenv(project_root / ".env")
+    load_dotenv(Path(__file__).resolve().parent / ".env")
+
+_configure_environment()
 
 app = Flask(__name__)
 CORS(app)
