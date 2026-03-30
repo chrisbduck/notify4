@@ -2,7 +2,7 @@ import type { AlertModel, FeedMessage, InformedEntity } from './model';
 import { downgradeSeverity, Severity, sortBySeverity } from './model';
 import mockAlertsData from './testdata/transit/mockAlerts.json';
 
-const ROUTE_ID = "100479"; // the 1 Line
+const IMPORTANT_ROUTE_IDS = new Set(["100479", "1LINE", "2LINE"]);
 
 const isLocalHost: boolean = window.location.href.includes('localhost');
 
@@ -72,7 +72,7 @@ export async function fetchAndProcessAlerts(useMockData: boolean): Promise<Alert
     if (useMockData) {
         console.log("Using mock alert data");
         const feedMessage = mockAlertsData as unknown as FeedMessage;
-        const filteredAlerts = _getFilteredAlerts(feedMessage, ROUTE_ID);
+        const filteredAlerts = _getFilteredAlerts(feedMessage, IMPORTANT_ROUTE_IDS);
         return processAlerts(filteredAlerts);
     }
 
@@ -84,7 +84,7 @@ export async function fetchAndProcessAlerts(useMockData: boolean): Promise<Alert
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const feedMessage: FeedMessage = await response.json();
-        const filteredAlerts = _getFilteredAlerts(feedMessage, ROUTE_ID);
+        const filteredAlerts = _getFilteredAlerts(feedMessage, IMPORTANT_ROUTE_IDS);
         return processAlerts(filteredAlerts);
     } catch (error) {
         console.error("Error fetching alerts:", error);
@@ -92,11 +92,13 @@ export async function fetchAndProcessAlerts(useMockData: boolean): Promise<Alert
     }
 }
 
-function _includesImportantRoute(entities: InformedEntity[], route_id: string): boolean {
-    return entities.some((entity: { route_id?: string }) => entity.route_id === route_id);
+function _includesImportantRoute(entities: InformedEntity[], routeIds: Set<string>): boolean {
+    return entities.some((entity: { route_id?: string }) => {
+        return entity.route_id !== undefined && routeIds.has(entity.route_id);
+    });
 }
 
-function _getFilteredAlerts(feedMessage: FeedMessage, route_id: string): AlertModel[] {
+function _getFilteredAlerts(feedMessage: FeedMessage, routeIds: Set<string>): AlertModel[] {
     const entities = feedMessage.entity || [];
     const filtered_results: AlertModel[] = [];
     for (const entity of entities) {
@@ -113,7 +115,7 @@ function _getFilteredAlerts(feedMessage: FeedMessage, route_id: string): AlertMo
 
         // Ignore unimportant routes
         const informedEntities = alert.informed_entity || [];
-        if (!_includesImportantRoute(informedEntities, route_id)) continue;
+        if (!_includesImportantRoute(informedEntities, routeIds)) continue;
 
         // Include it
         filtered_results.push(alert);
