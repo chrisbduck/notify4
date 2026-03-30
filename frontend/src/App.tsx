@@ -218,15 +218,6 @@ function App() {
                 </div>
             </header>
 
-            <AdminTestingPanel
-                shouldUseMockTransitData={shouldUseMockTransitData}
-                shouldUseMockWeatherData={shouldUseMockWeatherData}
-                shouldUseMockAQIData={shouldUseMockAQIData}
-                onToggleTransitMock={() => setShouldUseMockTransitData((value) => !value)}
-                onToggleWeatherMock={() => setShouldUseMockWeatherData((value) => !value)}
-                onToggleAqiMock={() => setShouldUseMockAQIData((value) => !value)}
-            />
-
             <section className="main-content-cards">
                 <AlertSummaryCard loading={loading} alerts={alerts} />
                 <WeatherCardDisplay currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
@@ -238,6 +229,15 @@ function App() {
                 <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
                 <TransitAlertsSection loading={loading} alerts={alerts} />
             </main>
+
+            <AdminTestingPanel
+                shouldUseMockTransitData={shouldUseMockTransitData}
+                shouldUseMockWeatherData={shouldUseMockWeatherData}
+                shouldUseMockAQIData={shouldUseMockAQIData}
+                onToggleTransitMock={() => setShouldUseMockTransitData((value) => !value)}
+                onToggleWeatherMock={() => setShouldUseMockWeatherData((value) => !value)}
+                onToggleAqiMock={() => setShouldUseMockAQIData((value) => !value)}
+            />
         </div>
     );
 }
