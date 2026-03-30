@@ -1,0 +1,38 @@
+.weather-table-container {
+  background-color: #282c34;
+  border-radius: 8px;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+}
+
+.weather-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.weather-table th,
+.weather-table td {
+  border: 1px solid #444;
+  padding: 10px;
+  text-align: left;
+}
+
+.weather-table th {
+  background-color: #3a3f47;
+  font-weight: bold;
+}
+
+.weather-table tr:nth-child(even) {
+  background-color: #333;
+}
+
+.weather-table-icon {
+  width: 40px;
+  height: 40px;
+  vertical-align: middle;
+  margin-right: 5px;
+}

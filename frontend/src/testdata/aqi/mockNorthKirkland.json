@@ -1,0 +1,10 @@
+{
+  "sensor": "north-kirkland",
+  "sensor_index": 192162,
+  "pm_field": "pm2.5_alt",
+  "pm25": 15.5,
+  "aqi": 57.5,
+  "category": "Moderate",
+  "last_seen": 1768720599,
+  "fetched_at": 1768720606
+}

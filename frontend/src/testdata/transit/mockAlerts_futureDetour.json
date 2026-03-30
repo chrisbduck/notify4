@@ -1,0 +1,714 @@
+{
+  "header": {
+    "gtfs_realtime_version": "2.0",
+    "incrementality": "FULL_DATASET",
+    "timestamp": 1764898930
+  },
+  "entity": [
+    {
+      "id": "7378",
+      "alert": {
+        "effect": "ACCESSIBILITY_ISSUE",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "ANNOUNCEMENT",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "CONSTRUCTION",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "CONSTRUCTION",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "SeaTac Airport Station 2nd pedestrian bridge elevator construction begins January 8, 2025.",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "Beginning January 8, 2025, through 2026, construction will take place at SeaTac Airport Station to add a new elevator to the pedestrian bridge. The new elevator will provide an additional option for passengers to travel from the pedestrian bridge to the pickup/drop off parking lot adjacent to the station. During construction, passengers can expect pedestrian walkways to occasionally be blocked or narrowed, and access to the current elevator periodically interrupted.\r\n\nDuring times where pedestrian walkways are blocked and elevator access is unavailable, passengers may catch the Rapid Ride A Line bus from SeaTac Airport Station to Tukwila International Boulevard Station in order to use the 1 Line. \r\n\nThe pedestrian bridge from the station to the airport will be unaffected and available throughout the duration of this project. \r\n\nBeginning February 10, 2025 half of the passenger pick up/drop off area will be closed, as will some parts of the plaza near the stairs and existing elevator as equipment begins to come in for construction of the new elevator.\r\n\nAdditional information about changes in elevator accessibility will be provided as it comes available.",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "WARNING",
+        "url": {
+          "translation": [
+            {
+
+              "text": "https://www.soundtransit.org/blog/platform/improving-accessibility-seatac-station-new-elevator-coming-soon",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1736334000
+          }
+        ],
+        "informed_entity": [
+          {
+            "route_id": "100479",
+            "stop_id": "99903"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "99904"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9962",
+      "alert": {
+        "effect": "OTHER_EFFECT",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "ANNOUNCEMENT",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "UNKNOWN_CAUSE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "UNKNOWN_CAUSE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "East stairwell at South Bellevue Station Garage is closed",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "The east stairwell in the center of the South Bellevue Station Garage is closed until further notice due to needed maintenance. To exit the garage, please use the stairwells located along the perimeters of the north and south ends.\r\n\nAffected lines:\r\n2 Line",
+              "language": "en"
+            }
+          ]
+        },
+
+        "severity_level": "WARNING",
+        "url": {
+          "translation": [
+            {
+              "text": "https://SoundTransit.org/alert/st/9962",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1747743420
+          }
+        ],
+        "informed_entity": [
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "2LINE",
+            "stop_id": "E09-T1"
+          },
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "2LINE",
+            "stop_id": "E09-T2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "12689",
+      "alert": {
+        "effect": "ACCESSIBILITY_ISSUE",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "ELEVATOR_CLOSURE",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "MAINTENANCE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "UNSCHEDULED_OUTAGE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "University of Washington Station - Elevator 2 unavailable until further notice due to a mechanical issue. \n",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+
+              "text": "The elevator at the Husky Stadium exit serving the street (Montlake Blvd NE), pedestrian bridge, and platform is out of service for the foreseeable future. \r\n\nDuring recent repairs, it was identified that a component in the elevator was damaged. The damaged component is not available for purchase separately, and a completely new machine will need to be ordered. These new machines have a significant lead time and the elevator will be out of service until repairs are complete. \r\n\nSee below for alternate route information.\r\n\nTo ride the 1 Line:\r\n\n1. Take the elevator located directly across from the out of service unit down to the platform.\r\n\nTo exit the station:\r\n\n1. Take the nearby elevator located directly across from the out of service unit up to the street or pedestrian bridge to Montlake Blvd NE.",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "WARNING",
+        "url": {
+          "translation": [
+            {
+              "text": "https://SoundTransit.org/alert/st/12689",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1758476940
+          }
+        ],
+        "informed_entity": [
+          {
+            "route_id": "100479",
+            "stop_id": "99604"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "99605"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "N05-E-00001"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "N05-E-00002"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "N05-E-00003"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "N05-E-00004"
+          }
+        ]
+      }
+    },
+    {
+      "id": "13988",
+      "alert": {
+        "effect": "OTHER_EFFECT",
+        "effect_detail": {
+          "translation": [
+            {
+
+              "text": "ANNOUNCEMENT",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "MAINTENANCE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "MAINTENANCE_ACTIVITY",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "Starting on September 11 through December 29, the south parking lot at Lynnwood Transit Center will be closed to vehicles. This is to allow for construction of a new trash enclosure.",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "The ONLY vehicles allowed access during the construction will be those using the ADA parking spaces and paratransit bus service. We apologize for any inconvenience this may cause. \r\n\nTo get information about other transit parking lots and garages, please click the link below. \r\n\nThe work schedule is subject to change. For updates, please subscribe to service alerts. Visit the service alerts web page to sign up for alerts and current information on service disruptions.\r\n",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "WARNING",
+        "url": {
+          "translation": [
+            {
+
+              "text": "https://www.soundtransit.org/ride-with-us/parking/parking-locations",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1763438460,
+            "end": 1767090600
+          }
+        ],
+        "informed_entity": [
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479"
+          }
+        ]
+      }
+    },
+    {
+
+      "id": "14110",
+      "alert": {
+        "effect": "ACCESSIBILITY_ISSUE",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "ANNOUNCEMENT",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "MAINTENANCE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "MAINTENANCE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "Elevator and Escalator upgrades at Int'l Dist/Chinatown Station",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "Sound Transit continues to upgrade elevators and escalators at International District/Chinatown Station. See below for current service status during the improvement process.\r\n\nExit A - to 5th Ave S & S Jackson St:\r\nâ€¢ Elevator 901 to Lynnwood platform â€“ in service\r\nâ€¢ Elevator 902 to Angle Lake platform â€“ in service\r\nâ€¢ Escalator 901 from Lynnwood platform â€“ out of service\r\nâ€¢ Escalator 902 from Angle Lake platform â€“ out of service\r\n\nExit B â€“ to 5th Ave S & King St:\r\nâ€¢ Elevator 904 to Angle Lake platform â€“ Currently out of service (Updated 10/20)\r\nâ€¢ Escalator 903 from Lynnwood platform â€“ in service\r\nâ€¢ Escalator 904 from Angle Lake platform â€“ in service\r\nâ€¢ Elevator 903 to Lynnwood platform â€“ in service\r\nâ€¢ Southeast stairwell to/from Lynnwood platform â€“ closed\r\n\n\r\nPassengers who need assistance while at a Sound Transit station, can call or text Security at (206) 398-5268.",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "WARNING",
+        "url": {
+          "translation": [
+            {
+
+              "text": "https://www.soundtransit.org/ride-with-us/stops-stations/international-district-chinatown-station?route_tab=arrivals",
+
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1763954760
+          }
+        ],
+        "informed_entity": [
+
+          {
+            "route_id": "100479",
+            "stop_id": "623"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "C09-E-00001"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "C09-E-00002"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "C09-E-00003"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "C09-E-00004"
+          }
+        ]
+      }
+    },
+    {
+      "id": "14193",
+      "alert": {
+        "effect": "OTHER_EFFECT",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "ANNOUNCEMENT",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "UNKNOWN_CAUSE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "UNKNOWN_CAUSE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "Testing for the 1 Line extension to Federal Way is underway. During testing, trains will continue south past Angle Lake Station. Passengers must deboard at Angle Lake. Service to Federal Way begins on Dec. 6.Â Â ",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "WARNING",
+
+        "url": {
+          "translation": [
+            {
+
+              "text": "https://www.soundtransit.org/blog/platform/final-testing-underway-federal-way-link-extension",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1764270300,
+            "end": 1765051200
+          }
+        ],
+        "informed_entity": [
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479"
+          }
+        ]
+      }
+    },
+    {
+      "id": "14215",
+      "alert": {
+        "effect": "ACCESSIBILITY_ISSUE",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "ELEVATOR_CLOSURE",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "MAINTENANCE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "MECHANICAL_ISSUE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "Update: Lynnwood City Center Garage - Elevator 1 unavailable until further notice. See below for alternate route information. See below for alternate route information.",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "To ride the 1 Line:\r\n\n1. Take the adjacent elevator to the street level.\r\n2. Enter the station through the Exit A.\r\n3. Take the elevator up to the platform.\r\n\nTo exit the station:\r\n\n1. Take the adjacent elevator to the street level.\r\n2. Exit the garage.",
+              "language": "en"
+
+            }
+          ]
+        },
+        "severity_level": "WARNING",
+        "url": {
+          "translation": [
+            {
+              "text": "https://SoundTransit.org/alert/st/14215",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1764393840
+          }
+        ],
+        "informed_entity": [
+          {
+            "route_id": "100479",
+            "stop_id": "N23-E-00001"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "N23-E-00002"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "N23-T1"
+          },
+          {
+            "route_id": "100479",
+            "stop_id": "N23-T2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "14246",
+      "alert": {
+        "effect": "NO_SERVICE",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "SUSPENSION",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "CONSTRUCTION",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "SCHEDULED_MAINTENANCE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "From 10 p.m. to the end of service, shuttle buses are replacing trains between Northgate and Capitol Hill. Trains will run between Lynnwood and Northgate and between Capitol Hill and Angle Lake. Expect up to 45 min of added travel times.",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "Train service between Lynnwood and Northgate and between Capitol Hill and Angle Lake stations: every 15 minutes.\r\n- At Northgate Station, passengers must board trains on the northbound/Lynnwood platform â€“ all days.\r\n- At Capitol Hill Station, passengers must board trains on the southbound/Angle Lake platform â€“ all days.\r\n\nAngle Lake to Lynnwood:\r\n- The last train to Lynnwood City Center serving all north stations will depart from Angle Lake at 9: 38 p.m., serving Capitol Hill at 10: 23 p.m. and Northgate at 10: 37 p.m.\r\n\nLynnwood to Angle Lake:\r\n- The last train to Angle Lake serving all north Seattle stations will depart from Lynnwood at 10: 17 p.m., serving Northgate at 10: 31 p.m. and Capitol Hill at 10: 43 p.m.\r\n\n1 Line shuttle buses between Northgate and Capitol Hill stations will run every 15 minutes.\r\n\nAffected stops:\r\n\nNorthgate :\r\n- to Angle Lake: Northgate Station â€“ Bay 4 \r\n\nRoosevelt: \r\n- to Lynnwood: 12th Ave NE & NE 67th St \r\n- to Angle Lake: Roosevelt Way NE & NE 65th St \r\n\n U District:\r\n - to Lynnwood: NE 43rd St & Brooklyn Ave NE \r\n - to Angle Lake: University Way NE & NE 43rd St â€“ Bay 4 \r\n\nUniv. of Washington: \r\n- to Lynnwood: Montlake Blvd NE & NE Pacific Pl â€“ Bay 4 \r\n- to Angle Lake: Montlake Blvd NE & NE Pacific Pl â€“ Bay 3 \r\n\nCapitol Hill :\r\n - to Lynnwood: E John St & 10th Ave E\r\n\n\r\nThis work schedule is subject to change.\r\n\n",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "SEVERE",
+        "url": {
+          "translation": [
+            {
+              "text": "https://www.soundtransit.org/1LineAlternatives",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1764914400,
+            "end": 1764930600
+          }
+        ],
+        "informed_entity": [
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479",
+            "stop_id": "990001"
+          },
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479",
+            "stop_id": "990003"
+          },
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479",
+            "stop_id": "99604"
+          },
+
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479",
+            "stop_id": "990002"
+          },
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479",
+            "stop_id": "990004"
+          },
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479",
+            "stop_id": "99605"
+          }
+        ]
+      }
+    },
+    {
+      "id": "14263",
+      "alert": {
+        "effect": "OTHER_EFFECT",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "ANNOUNCEMENT",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "UNKNOWN_CAUSE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "UNKNOWN_CAUSE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "1 Line will begin serving Federal Way Dec. 6",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "The 1 Line is coming to South King County. On Dec. 6 Link light rail trains will begin serving Kent Des Moines, Star Lake, and Federal Way! ",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "WARNING",
+        "url": {
+          "translation": [
+            {
+
+              "text": "https://www.soundtransit.org/southkinglink",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1764703080,
+            "end": 1765045740
+          }
+        ],
+        "informed_entity": [
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479"
+          }
+        ]
+      }
+    },
+    {
+      "id": "14327",
+      "alert": {
+        "effect": "DETOUR",
+        "effect_detail": {
+          "translation": [
+            {
+              "text": "LINK_SHUTTLE",
+              "language": "en"
+            }
+          ]
+        },
+        "cause": "UNKNOWN_CAUSE",
+        "cause_detail": {
+          "translation": [
+            {
+              "text": "UNKNOWN_CAUSE",
+              "language": "en"
+            }
+          ]
+        },
+        "header_text": {
+          "translation": [
+            {
+              "text": "From 11 p.m. on Friday, Dec. 12, to 10 a.m. on Saturday, Dec. 13, 1 Line Shuttle buses will replace trains between Capitol Hill and Stadium stations.",
+              "language": "en"
+            }
+          ]
+        },
+        "description_text": {
+          "translation": [
+            {
+              "text": "Sound Transit is upgrading signaling equipment in downtown Seattle stations to improve system reliability.\r\n \r\n1 Line trains will arrive every 15 minutes between Lynnwood City Center and Capitol Hill stations, and every 10-15 minutes between Stadium and Federal Way Downtown stations.\r\n\n1 Line Shuttle buses will arrive at closed stations every 10-15 minutes. Below are shuttle stops for affected stations:\r\n\nCapitol Hill\r\n- to Federal Way: Broadway & E Denny Way - Bay 4\r\n\nWestlake\r\n- to Lynnwood:              3rd Ave & Pine St\r\n- to Federal Way: Pine St & 5th Ave\r\n\nSymphony\r\n- to Lynnwood:              3rd Ave & Union St\r\n- to Federal Way: 3rd Ave & Union St\r\n\nPioneer Square\r\n- to Lynnwood: 3rd Ave & James St\r\n- to Federal Way: 3rd Ave & James St\r\n\nInternational District/Chinatown\r\n- to Lynnwood: 4th Ave S & S Jackson St\r\n- to Federal Way: 5th Ave S & S Weller St\r\n\nStadium\r\n- to Lynnwood: SODO Busway & S Royal Brougham Way",
+              "language": "en"
+            }
+          ]
+        },
+        "severity_level": "SEVERE",
+        "url": {
+          "translation": [
+            {
+              "text": "https://www.soundtransit.org/1LineAlternatives",
+              "language": "en"
+            }
+          ]
+        },
+        "active_period": [
+          {
+            "start": 1765609200,
+            "end": 1765648800
+          }
+        ],
+        "informed_entity": [
+          {
+            "agency_id": "40",
+            "route_type": 0,
+            "route_id": "100479"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+.weather-display-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.weather-card {
+  background-color: #2a2a2a; /* Darker grey background, similar to alert-item */
+  border: 1px solid #444; /* Softer border for dark mode, similar to alert-item */
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slightly darker shadow for dark mode */
+  text-align: center;
+  width: 200px;
+  height: 250px; /* Set a fixed height for consistent card sizing */
+  display: flex; /* Use flexbox for internal layout */
+  flex-direction: column; /* Stack content vertically */
+  justify-content: space-evenly; /* Distribute space evenly between items */
+  color: #e0e0e0; /* Softer white text, similar to alert-item */
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.weather-card:hover {
+  background-color: #3a3a3a; /* Slightly lighter on hover, similar to alert-item */
+  border-color: #666; /* Lighter border on hover, similar to alert-item */
+}
+
+.weather-card h3 {
+  margin-top: 0;
+  color: #e0e0e0; /* Consistent with other header text */
+}
+
+.weather-icon {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
+}
+
+.weather-card p {
+  margin: 5px 0;
+  color: #f0f0f0; /* Light text color for content */
+  font-size: 0.9em;
+}
+
+.weather-title {
+  margin-bottom: 8px;
+}
+
+.weather-details-container {
+  display: flex;
+  justify-content: space-evenly; /* Distribute space evenly */
+  align-items: flex-start;
+  flex-grow: 1; /* Allow this container to grow and fill space */
+}
+
+.weather-details-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.weather-details-column h4 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #e0e0e0;
+  font-size: 1em;
+}
+
+.weather-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.alert-summary-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1; /* Allow content to grow and fill available space */
+}
+
+.alert-summary-icon {
+  font-size: 3em;
+  margin-bottom: 10px;
+}
+
+.alert-summary-icon.severe-icon {
+  color: #ff4d4d; /* Red for severe alerts */
+}
+
+.alert-summary-icon.warning-icon {
+  color: #ffcc00; /* Yellow for warning alerts */
+}
+
+.alert-summary-icon.success-icon {
+  color: #5cb85c; /* Green for no major problems */
+}

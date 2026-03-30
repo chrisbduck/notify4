@@ -1,88 +1,216 @@
-import { useState, FC } from 'react'
-import './App.css'
+import { useState, useCallback } from 'react';
+import './App.css';
+import WeatherCardDisplay from './WeatherCardDisplay';
+import AlertSummaryCard from './AlertSummaryCard';
+import AqiDisplay from './AqiDisplay';
+import { fetchAndProcessAlerts } from './alertService';
+import { type AlertModel } from './model';
+import { usePolling } from './hooks/usePolling';
+import { TransitAlertsSection } from './TransitAlertsSection';
+import { getSeattleWeather, isBefore2PM, type WeatherData } from './weatherService';
+import { WeatherDetailsSection } from './WeatherDetailsSection';
+import { useShouldUseMockAQIData, useShouldUseMockTransitData, useShouldUseMockWeatherData } from './mockData';
+import { MockDataToggle } from './MockDataToggle';
 
-interface ApiResponse {
-    status: string
-    message: string
-    data: Record<string, unknown>
+interface EndpointResult {
+    status: 'idle' | 'loading' | 'success' | 'error';
+    label: string;
+    body?: unknown;
+    error?: string;
 }
 
-const App: FC = () => {
-    const [test1Result, setTest1Result] = useState<ApiResponse | null>(null)
-    const [test2Result, setTest2Result] = useState<ApiResponse | null>(null)
-    const [test3Result, setTest3Result] = useState<ApiResponse | null>(null)
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string | null>(null)
+function AdminTestingPanel({
+    shouldUseMockTransitData,
+    shouldUseMockWeatherData,
+    shouldUseMockAQIData,
+}: {
+    shouldUseMockTransitData: boolean;
+    shouldUseMockWeatherData: boolean;
+    shouldUseMockAQIData: boolean;
+}) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [results, setResults] = useState<Record<string, EndpointResult>>({
+        test1: { status: 'idle', label: 'Test endpoint' },
+        downloadAlerts: { status: 'idle', label: 'Download alerts' },
+        health: { status: 'idle', label: 'Health check' },
+    });
 
-    const callEndpoint = async (endpoint: string, setResult: (data: ApiResponse) => void): Promise<void> => {
-        setLoading(true)
-        setError(null)
+    const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    const callEndpoint = async (key: string, label: string, path: string) => {
+        setResults((current) => ({
+            ...current,
+            [key]: { status: 'loading', label },
+        }));
+
         try {
-            const response = await fetch(`/api/${endpoint}`)
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
-            }
-            const data: ApiResponse = await response.json()
-            setResult(data)
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : String(err)
-            setError(`Failed to call ${endpoint}: ${errorMessage}`)
-        } finally {
-            setLoading(false)
-        }
-    }
+            const response = await fetch(path);
+            const contentType = response.headers.get('content-type') ?? '';
+            const body = contentType.includes('application/json') ? await response.json() : await response.text();
 
-    const handleCallTest1 = () => callEndpoint('test1', setTest1Result)
-    const handleCallTest2 = () => callEndpoint('test2', setTest2Result)
-    const handleCallTest3 = () => callEndpoint('download-alerts', setTest3Result)
+            if (!response.ok) {
+                throw new Error(typeof body === 'string' ? body : `HTTP error ${response.status}`);
+            }
+
+            setResults((current) => ({
+                ...current,
+                [key]: { status: 'success', label, body },
+            }));
+        } catch (error) {
+            setResults((current) => ({
+                ...current,
+                [key]: {
+                    status: 'error',
+                    label,
+                    error: error instanceof Error ? error.message : String(error),
+                },
+            }));
+        }
+    };
 
     return (
-        <div className="container">
-            <h1>Notify4 - Backend Test</h1>
-            <p className="subtitle">Testing Flask API endpoints from React (TypeScript version)</p>
+        <section className="admin-panel">
+            <button
+                className="admin-panel-toggle"
+                onClick={() => setIsExpanded((expanded) => !expanded)}
+                aria-expanded={isExpanded}
+                aria-controls="admin-panel-body"
+            >
+                <span>Admin / Testing</span>
+                <span className={`admin-panel-chevron ${isExpanded ? 'expanded' : ''}`}>▾</span>
+            </button>
 
-            <div className="button-group">
-                <button onClick={handleCallTest1} disabled={loading}>
-                    Call Test Endpoint 1
-                </button>
-                <button onClick={handleCallTest2} disabled={loading}>
-                    Call Test Endpoint 2
-                </button>
-                <button onClick={handleCallTest3} disabled={loading}>
-                    Call Download Alerts Endpoint
-                </button>
-            </div>
+            {isExpanded && (
+                <div className="admin-panel-body" id="admin-panel-body">
+                    <div className="admin-actions">
+                        <button onClick={() => callEndpoint('test1', 'Test endpoint', '/api/test1')}>
+                            Run `test1`
+                        </button>
+                        <button onClick={() => callEndpoint('downloadAlerts', 'Download alerts', '/api/download-alerts')}>
+                            Run `download-alerts`
+                        </button>
+                        <button onClick={() => callEndpoint('health', 'Health check', '/api/health')}>
+                            Run health check
+                        </button>
+                    </div>
 
-            {error && <div className="error">{error}</div>}
+                    <div className="admin-results">
+                        {Object.entries(results).map(([key, result]) => (
+                            <div className="admin-result-card" key={key}>
+                                <div className="admin-result-header">
+                                    <h3>{result.label}</h3>
+                                    <span className={`status-pill status-${result.status}`}>{result.status}</span>
+                                </div>
+                                {result.status === 'idle' && <p>Run this action to inspect the current response.</p>}
+                                {result.status === 'loading' && <p>Request in progress...</p>}
+                                {result.status === 'error' && <p className="admin-error">{result.error}</p>}
+                                {result.status === 'success' && (
+                                    <pre>{JSON.stringify(result.body, null, 2)}</pre>
+                                )}
+                            </div>
+                        ))}
+                    </div>
 
-            {test1Result && (
-                <div className="result">
-                    <h2>Test 1 Result</h2>
-                    <pre>{JSON.stringify(test1Result, null, 2)}</pre>
+                    {isLocalHost && (
+                        <div className="admin-mocks">
+                            <div className="admin-mocks-header">
+                                <h3>Local Mock Data</h3>
+                                <p>These toggles are only available on localhost.</p>
+                            </div>
+                            <div className="mock-toggle-row">
+                                <MockDataToggle useHook={useShouldUseMockTransitData} label="Mock Transit Data" />
+                                <MockDataToggle useHook={useShouldUseMockWeatherData} label="Mock Weather Data" />
+                                <MockDataToggle useHook={useShouldUseMockAQIData} label="Mock AQI Data" />
+                            </div>
+                            <div className="mock-state-summary">
+                                <span>Transit: {shouldUseMockTransitData ? 'mock' : 'live'}</span>
+                                <span>Weather: {shouldUseMockWeatherData ? 'mock' : 'live'}</span>
+                                <span>AQI: {shouldUseMockAQIData ? 'mock' : 'live'}</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
-
-            {test2Result && (
-                <div className="result">
-                    <h2>Test 2 Result</h2>
-                    <pre>{JSON.stringify(test2Result, null, 2)}</pre>
-                </div>
-            )}
-
-            {test3Result && (
-                <div className="result">
-                    <h2>Download Alerts Result</h2>
-                    <pre>{JSON.stringify(test3Result, null, 2)}</pre>
-                </div>
-            )}
-
-            {!test1Result && !test2Result && !test3Result && !error && (
-                <div className="placeholder">
-                    Click a button to call a backend endpoint
-                </div>
-            )}
-        </div>
-    )
+        </section>
+    );
 }
 
-export default App
+function App() {
+    const [alerts, setAlerts] = useState<AlertModel[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [lastFetched, setLastFetched] = useState<string | null>(null);
+    const [shouldUseMockTransitData] = useShouldUseMockTransitData();
+    const [shouldUseMockWeatherData] = useShouldUseMockWeatherData();
+    const [shouldUseMockAQIData] = useShouldUseMockAQIData();
+
+    const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
+    const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
+
+    const fetchSeattleWeather = useCallback(async () => {
+        setSeattleWeather(await getSeattleWeather(shouldUseMockWeatherData));
+        if (isBefore2PM()) {
+            const fourPM = new Date();
+            fourPM.setHours(16, 0, 0, 0);
+            setSeattleWeather4pm(await getSeattleWeather(shouldUseMockWeatherData, fourPM));
+            return;
+        }
+        setSeattleWeather4pm(null);
+    }, [shouldUseMockWeatherData]);
+
+    usePolling(fetchSeattleWeather, 300000);
+
+    const fetchAlerts = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const nextAlerts: AlertModel[] = await fetchAndProcessAlerts(shouldUseMockTransitData);
+            setAlerts(nextAlerts);
+            setLastFetched(new Date().toLocaleTimeString());
+        } catch (fetchError) {
+            setError('Failed to fetch alerts.');
+            console.error('Error fetching alerts:', fetchError);
+        } finally {
+            setLoading(false);
+        }
+    }, [shouldUseMockTransitData]);
+
+    usePolling(fetchAlerts, 60000);
+
+    return (
+        <div className="app-shell">
+            <header className="app-header">
+                <div>
+                    <p className="eyebrow">Notify4</p>
+                    <h1>Alerts for Chris</h1>
+                    <p className="header-copy">
+                        Daily transit, weather, and air quality checks with a built-in admin/testing panel.
+                    </p>
+                </div>
+                <div className="header-meta">
+                    {loading ? <p>Loading alerts...</p> : lastFetched && <p>Last updated: {lastFetched}</p>}
+                </div>
+            </header>
+
+            <AdminTestingPanel
+                shouldUseMockTransitData={shouldUseMockTransitData}
+                shouldUseMockWeatherData={shouldUseMockWeatherData}
+                shouldUseMockAQIData={shouldUseMockAQIData}
+            />
+
+            <section className="main-content-cards">
+                <AlertSummaryCard loading={loading} alerts={alerts} />
+                <WeatherCardDisplay currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
+                <AqiDisplay mockData={shouldUseMockAQIData} />
+            </section>
+
+            <main className="dashboard-sections">
+                {error && <p className="page-error">{error}</p>}
+                <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
+                <TransitAlertsSection loading={loading} alerts={alerts} />
+            </main>
+        </div>
+    );
+}
+
+export default App;

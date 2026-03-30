@@ -1,0 +1,10 @@
+{
+  "sensor": "seattle-downtown",
+  "sensor_index": 167259,
+  "pm_field": "pm2.5_alt",
+  "pm25": 8,
+  "aqi": 33.3,
+  "category": "Good",
+  "last_seen": 1768720570,
+  "fetched_at": 1768720606
+}

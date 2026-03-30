@@ -1,0 +1,10 @@
+{
+  "sensor": "mountlake-terrace",
+  "sensor_index": 156807,
+  "pm_field": "pm2.5_alt",
+  "pm25": 7.4,
+  "aqi": 30.8,
+  "category": "Good",
+  "last_seen": 1768720600,
+  "fetched_at": 1768720606
+}

@@ -1,0 +1,133 @@
+.alert-item {
+  display: flex;
+  flex-direction: column; /* Change to column for stacking rows */
+  border: 1px solid #444; /* Softer border for dark mode */
+  padding: 12px; /* Slightly increased padding */
+  margin-bottom: 10px;
+  border-radius: 8px; /* Slightly more rounded corners */
+  background-color: #2a2a2a; /* Darker grey background */
+  color: #e0e0e0; /* Softer white text */
+  position: relative; /* For absolute positioning of icon if needed */
+  text-align: left;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Smooth transition for hover */
+}
+
+.alert-item:hover {
+  background-color: #3a3a3a; /* Slightly lighter on hover */
+  border-color: #666; /* Lighter border on hover */
+}
+
+.alert-header-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  cursor: pointer; /* Indicate that the header is clickable */
+  justify-content: flex-start; /* Align items to the start */
+  gap: 20px; /* Add space between items */
+}
+
+.alert-header-row h2 {
+  margin: 0;
+  font-size: 1.2em; /* Main heading size */
+}
+
+.alert-icon {
+  font-size: 1.5rem; /* Changed from em to rem for consistent sizing */
+  width: 1.5rem; /* Explicit width */
+  height: 1.5rem; /* Explicit height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent shrinking */
+  vertical-align: middle; /* Align icon vertically */
+}
+
+.warning-icon {
+  color: #ffc107; /* Yellow for warning */
+}
+
+.info-icon {
+  color: #17a2b8; /* Blue for info */
+}
+
+.severe-icon {
+  color: #dc3545; /* Red for severe */
+}
+
+.alert-description-row {
+  margin-bottom: 5px;
+  max-height: 1000px; /* Increased max height for expanded state to accommodate mobile content */
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* Smooth slide transition */
+  opacity: 1;
+}
+
+.alert-description-row p {
+  margin: 8px 0; /* Increased vertical margin */
+  font-size: 0.95em; /* Slightly larger font for description */
+  line-height: 1.5; /* Improved line height for readability */
+  white-space: pre-wrap; /* Handle newline characters */
+}
+
+/* Severity-based brightness */
+.alert-item.severity-info {
+  filter: brightness(0.7); /* Dimmest for INFO */
+}
+
+.alert-item.severity-warning {
+  filter: brightness(0.9); /* Slightly brighter for WARNING */
+}
+
+.alert-item.severity-severe {
+  filter: brightness(1.1); /* Brightest for SEVERE */
+}
+
+.alert-footer-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* Distribute items */
+  align-items: center;
+  margin-top: 10px;
+  font-size: 0.8em; /* Smaller font for footer info */
+  max-height: 1000px; /* Increased max height for expanded state to accommodate mobile content */
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out; /* Smooth slide transition */
+  opacity: 1;
+}
+
+.alert-footer-row p {
+  margin: 0;
+}
+
+.alert-footer-row a {
+  margin-left: auto;
+  color: #8ab4f8; /* A subtle blue accent for links */
+  text-decoration: none; /* Remove underline */
+  transition: color 0.2s ease-in-out;
+}
+
+.alert-footer-row a:hover {
+  color: #a7c7ff; /* Lighter blue on hover */
+  text-decoration: underline; /* Underline on hover */
+}
+
+.collapse-button {
+  background: none;
+  border: none;
+  color: #fff; /* White color for the icon */
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: auto; /* Push the button to the far right */
+  padding: 0;
+  display: flex; /* Use flexbox for centering content */
+  align-items: center; /* Vertically center the icon */
+  justify-content: center; /* Horizontally center the icon */
+}
+
+.alert-item.collapsed .alert-description-row,
+.alert-item.collapsed .alert-footer-row {
+  max-height: 0; /* Collapse height */
+  opacity: 0; /* Fade out */
+  margin-bottom: 0; /* Remove margin when collapsed */
+  margin-top: 0; /* Remove margin when collapsed */
+}
