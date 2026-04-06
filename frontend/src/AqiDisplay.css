@@ -1,105 +1,13 @@
-.aqi-display-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.aqi-card {
-  background-color: #2a2a2a; /* Darker grey background, similar to alert-item */
-  border: 1px solid #444; /* Softer border for dark mode, similar to alert-item */
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Slightly darker shadow for dark mode */
-  text-align: center;
-  width: 200px;
-  height: 250px; /* Set a fixed height for consistent card sizing */
-  display: flex; /* Use flexbox for internal layout */
-  flex-direction: column; /* Stack content vertically */
-  justify-content: space-evenly; /* Distribute space evenly between items */
-  color: #e0e0e0; /* Softer white text, similar to alert-item */
-  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.aqi-card:hover {
-  background-color: #3a3a3a; /* Slightly lighter on hover, similar to alert-item */
-  border-color: #666; /* Lighter border on hover, similar to alert-item */
-}
-
-.aqi-card h3 {
-  margin-top: 0;
-  color: #e0e0e0; /* Consistent with other header text */
-}
-
-.aqi-circle {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-  border: 2px solid #555; /* Subtle border for definition */
-}
-
-.aqi-circle-good {
-  background-color: #5cb85c; /* Green from transit alerts */
-}
-
-.aqi-circle-moderate {
-  background-color: #ffff00; /* Yellow */
-}
-
-.aqi-circle-unhealthy-for-sensitive-groups {
-  background-color: #ff7e00; /* Orange */
-}
-
-.aqi-circle-unhealthy {
-  background-color: #ff0000; /* Red */
-}
-
-.aqi-circle-very-unhealthy {
-  background-color: #8f3e97; /* Purple */
-}
-
-.aqi-circle-hazardous {
-  background-color: #7e0023; /* Maroon/Dark Red */
-}
-
-.aqi-card p {
-  margin: 5px 0;
-  color: #f0f0f0; /* Light text color for content */
-  font-size: 0.9em;
-}
-
-.aqi-details-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-grow: 1; /* Allow this container to grow and fill space */
-}
-
-.aqi-value {
-  font-size: 2em;
-  font-weight: bold;
-  margin: 0;
-}
-
-.aqi-category {
-  font-size: 1em;
-  margin: 0;
-}
-
 .aqi-combined-card {
   background-color: #2a2a2a;
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 15px 20px;
+  padding: 15px 16px 14px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   width: 200px;
-  height: 200px;
+  min-height: 250px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   color: #e0e0e0;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   cursor: pointer;
@@ -110,46 +18,106 @@
   border-color: #666;
 }
 
+.aqi-card-layout {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
 .aqi-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .aqi-header-row h3 {
   margin: 0;
+  flex: 1;
   text-align: center;
-  flex-grow: 1;
-}
-
-.aqi-content-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  flex-grow: 1;
-}
-
-.aqi-header-left-spacer,
-.aqi-right-spacer {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.aqi-header-left-spacer {
-  visibility: hidden;
+  color: #e0e0e0;
 }
 
 .aqi-main-content {
-  flex-grow: 1;
-  text-align: center;
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.aqi-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #555;
+  flex-shrink: 0;
+}
+
+.aqi-circle-good {
+  background-color: #5cb85c;
+}
+
+.aqi-circle-moderate {
+  background-color: #ffff00;
+}
+
+.aqi-circle-unhealthy-for-sensitive-groups {
+  background-color: #ff7e00;
+}
+
+.aqi-circle-unhealthy {
+  background-color: #ff0000;
+}
+
+.aqi-circle-very-unhealthy {
+  background-color: #8f3e97;
+}
+
+.aqi-circle-hazardous {
+  background-color: #7e0023;
+}
+
+.aqi-value {
+  margin: 0;
+  font-size: 2em;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.aqi-category {
+  margin: 0;
+  color: #f0f0f0;
+}
+
+.aqi-category-summary {
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.98rem;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.aqi-summary-line {
+  margin: 0;
+  color: #bfd3ea;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.aqi-range-line {
+  color: #dbeafe;
+}
+
+.aqi-summary-loading {
+  margin: 0;
+  color: #bfd3ea;
+  font-size: 0.92rem;
 }
 
 .expand-icon {
@@ -159,19 +127,6 @@
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  transition: transform 0.3s ease-in-out;
-}
-
-.aqi-details-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.expand-icon {
-  display: flex;
-  align-items: center;
   transition: transform 0.3s ease-in-out;
 }
 
@@ -179,29 +134,109 @@
   transform: rotate(180deg);
 }
 
-.aqi-expanded-details {
+.aqi-expanded-drawer {
+  grid-column: 1 / -1;
+  border: 1px solid #444;
+  border-radius: 14px;
+  background: #2a2a2a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 14px;
+  margin-top: -8px;
+}
+
+.aqi-expanded-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.aqi-station-card {
+  border: 1px solid #555;
+  border-radius: 12px;
+  background: #252525;
+  padding: 16px;
+  min-height: 148px;
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 20px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.aqi-station-card:hover {
+  background-color: #303030;
+  border-color: #666;
+}
+
+.aqi-station-header {
+  min-height: 1.6em;
+  display: flex;
+  align-items: flex-start;
+}
+
+.aqi-location-name {
+  color: #f8fafc;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.aqi-location-short {
+  display: none;
+}
+
+.aqi-station-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+}
+
+.aqi-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.aqi-station-category {
+  color: #f0f0f0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.aqi-station-reading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.aqi-station-value {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 2.15rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.aqi-station-loading {
+  margin: 0;
+  color: #bfd3ea;
 }
 
 @media (max-width: 768px) {
-  .aqi-display-container {
-    width: 100%;
-    gap: 12px;
-  }
-
   .aqi-combined-card {
     width: 100%;
     min-width: 0;
-    height: 156px;
+    min-height: 156px;
     padding: 12px 10px;
   }
 
   .aqi-header-row {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .aqi-header-row h3 {
@@ -209,8 +244,6 @@
     line-height: 1.1;
   }
 
-  .aqi-header-left-spacer,
-  .aqi-right-spacer,
   .expand-icon {
     width: 18px;
     height: 18px;
@@ -219,16 +252,60 @@
   .aqi-circle {
     width: 42px;
     height: 42px;
-    margin-bottom: 8px;
   }
 
   .aqi-value {
     font-size: 1.65rem;
-    line-height: 1;
   }
 
-  .aqi-category {
-    font-size: 0.82rem;
+  .aqi-category-summary {
+    min-height: 2.9em;
+    font-size: 0.8rem;
     line-height: 1.15;
+  }
+
+  .aqi-summary-line {
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
+
+  .aqi-expanded-drawer {
+    padding: 12px;
+    margin-top: 2px;
+  }
+
+  .aqi-expanded-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .aqi-station-card {
+    min-height: 0;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .aqi-location-full {
+    display: none;
+  }
+
+  .aqi-location-short {
+    display: inline;
+  }
+
+  .aqi-station-meta {
+    min-height: 0;
+  }
+
+  .aqi-station-category {
+    font-size: 0.88rem;
+  }
+
+  .aqi-station-reading {
+    gap: 12px;
+  }
+
+  .aqi-station-value {
+    font-size: 1.75rem;
   }
 }

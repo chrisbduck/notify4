@@ -1,9 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { getAqiDataForLocation, type AqiData } from './aqiService';
-import AqiCard from './AqiCard';
 import './AqiDisplay.css';
 
-// Helper function to determine AQI category based on AQI value
+const AQI_CATEGORY_ORDER = [
+    'Good',
+    'Moderate',
+    'Unhealthy for Sensitive Groups',
+    'Unhealthy',
+    'Very Unhealthy',
+    'Hazardous',
+] as const;
+
 const getAqiCategory = (aqi: number): string => {
     if (aqi <= 50) return 'Good';
     if (aqi <= 100) return 'Moderate';
@@ -13,8 +20,44 @@ const getAqiCategory = (aqi: number): string => {
     return 'Hazardous';
 };
 
+const getCategoryRank = (category: string): number => {
+    const index = AQI_CATEGORY_ORDER.indexOf(category as (typeof AQI_CATEGORY_ORDER)[number]);
+    return index === -1 ? AQI_CATEGORY_ORDER.length : index;
+};
+
+const getWorstCategory = (categories: string[]): string => {
+    return categories.reduce((worst, current) => {
+        if (!worst) {
+            return current;
+        }
+
+        return getCategoryRank(current) > getCategoryRank(worst) ? current : worst;
+    }, '');
+};
+
+const formatAqiRange = (values: number[]) => {
+    if (values.length === 0) {
+        return 'Range unavailable';
+    }
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    return `Range: ${min.toFixed(1)}-${max.toFixed(1)}`;
+};
+
+const formatLocationSummary = (label: string, data: AqiData | null) => {
+    return `${label} ${data ? data.aqi.toFixed(1) : '--'}`;
+};
+
 interface AqiDisplayProps {
     mockData: boolean;
+}
+
+interface LocationEntry {
+    id: string;
+    fullName: string;
+    shortName: string;
+    data: AqiData | null;
 }
 
 const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) => {
@@ -28,9 +71,9 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
         const fetchAqiData = async () => {
             setIsLoading(true);
             const [nkData, sdData, mtData] = await Promise.all([
-                getAqiDataForLocation("north-kirkland", mockData),
-                getAqiDataForLocation("seattle-downtown", mockData),
-                getAqiDataForLocation("mountlake-terrace", mockData)
+                getAqiDataForLocation('north-kirkland', mockData),
+                getAqiDataForLocation('seattle-downtown', mockData),
+                getAqiDataForLocation('mountlake-terrace', mockData),
             ]);
             setNkAqi(nkData);
             setSdAqi(sdData);
@@ -39,43 +82,48 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
         };
 
         fetchAqiData();
-        const interval = setInterval(fetchAqiData, 300000); // Refresh every 5 minutes
+        const interval = setInterval(fetchAqiData, 300000);
 
         return () => clearInterval(interval);
     }, [mockData]);
 
-    const allAqiValues = [nkAqi?.aqi, sdAqi?.aqi, mtAqi?.aqi].filter(
-        (aqi): aqi is number => aqi !== null && aqi !== undefined
+    const locations = useMemo<LocationEntry[]>(
+        () => [
+            { id: 'north-kirkland', fullName: 'North Kirkland', shortName: 'Kirkland', data: nkAqi },
+            { id: 'seattle-downtown', fullName: 'Seattle Downtown', shortName: 'Seattle', data: sdAqi },
+            { id: 'mountlake-terrace', fullName: 'Mountlake Terrace', shortName: 'Mountlake', data: mtAqi },
+        ],
+        [nkAqi, sdAqi, mtAqi],
     );
 
+    const populatedLocations = locations.filter((location) => location.data !== null);
+    const allAqiValues = populatedLocations.map((location) => location.data!.aqi);
+    const categories = populatedLocations.map((location) => location.data!.category);
     const averageAqi = allAqiValues.length > 0
         ? allAqiValues.reduce((sum, aqi) => sum + aqi, 0) / allAqiValues.length
         : null;
 
-    const averageAqiCategory = averageAqi !== null ? getAqiCategory(averageAqi) : (isLoading ? 'Loading' : 'Not Available');
+    const allCategoriesMatch = categories.length > 0 && categories.every((category) => category === categories[0]);
+    const summaryCategory = averageAqi === null
+        ? (isLoading ? 'Loading' : 'Not Available')
+        : allCategoriesMatch
+            ? getAqiCategory(averageAqi)
+            : getWorstCategory(categories);
 
-    const toggleExpanded = () => {
-        setIsExpanded(!isExpanded);
-    };
+    const summaryLocationLine = locations
+        .map((location) => formatLocationSummary(location.shortName, location.data))
+        .join(' · ');
 
-    const combinedAqiContents = isLoading ? (
-        <p>Loading AQI data...</p>
-    ) : averageAqi !== null ? (
-        <div className="aqi-details-container">
-            <div className={`aqi-circle aqi-circle-${averageAqiCategory.toLowerCase().replace(/\s/g, '-')}`}></div>
-            <p className="aqi-value">{averageAqi.toFixed(1)}</p>
-            <p className="aqi-category">{averageAqiCategory}</p>
-        </div>
-    ) : (
-        <div className="aqi-details-container">
-            <p className="aqi-value">--</p>
-            <p className="aqi-category">Not Available</p>
-        </div>
-    );
+    const summaryRangeLine = formatAqiRange(allAqiValues);
 
     return (
-        <div className="aqi-display-container">
-            <button className="aqi-combined-card" onClick={toggleExpanded}>
+        <>
+            <button
+                className="aqi-combined-card"
+                onClick={() => setIsExpanded((expanded) => !expanded)}
+                aria-expanded={isExpanded}
+                aria-controls="aqi-expanded-drawer"
+            >
                 <div className="aqi-card-layout">
                     <div className="aqi-header-row">
                         <h3>Air Quality</h3>
@@ -85,23 +133,58 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
                             </svg>
                         </span>
                     </div>
-                    <div className="aqi-content-row">
-                        <div className="aqi-header-left-spacer"></div> {/* Empty spacer */}
-                        <div className="aqi-main-content">
-                            {combinedAqiContents}
-                        </div>
-                        <div className="aqi-right-spacer"></div> {/* Empty spacer for symmetry */}
+
+                    <div className="aqi-main-content">
+                        {isLoading ? (
+                            <p className="aqi-summary-loading">Loading AQI data...</p>
+                        ) : averageAqi !== null ? (
+                            <>
+                                <div className={`aqi-circle aqi-circle-${summaryCategory.toLowerCase().replace(/\s/g, '-')}`}></div>
+                                <p className="aqi-value">{averageAqi.toFixed(1)}</p>
+                                <p className="aqi-category aqi-category-summary">{summaryCategory}</p>
+                                <p className="aqi-summary-line">{summaryLocationLine}</p>
+                                <p className="aqi-summary-line aqi-range-line">{summaryRangeLine}</p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="aqi-value">--</p>
+                                <p className="aqi-category aqi-category-summary">Not Available</p>
+                                <p className="aqi-summary-line">{summaryLocationLine}</p>
+                            </>
+                        )}
                     </div>
                 </div>
             </button>
+
             {isExpanded && (
-                <div className="aqi-expanded-details">
-                    <AqiCard locationName="North Kirkland" aqiData={nkAqi} />
-                    <AqiCard locationName="Seattle Downtown" aqiData={sdAqi} />
-                    <AqiCard locationName="Mountlake Terrace" aqiData={mtAqi} />
-                </div>
+                <section className="aqi-expanded-drawer" id="aqi-expanded-drawer">
+                    <div className="aqi-expanded-grid">
+                        {locations.map((location) => (
+                            <article className="aqi-station-card" key={location.id}>
+                                <div className="aqi-station-header">
+                                    <span className="aqi-location-name aqi-location-full">{location.fullName}</span>
+                                    <span className="aqi-location-name aqi-location-short">{location.shortName}</span>
+                                </div>
+
+                                {location.data ? (
+                                    <>
+                                        <div className="aqi-station-reading">
+                                            <p className="aqi-station-value">{location.data.aqi.toFixed(1)}</p>
+                                            <div className="aqi-station-meta">
+                                                <span className={`aqi-dot aqi-circle-${location.data.category.toLowerCase().replace(/\s/g, '-')}`}></span>
+                                                <span className="aqi-station-category">{location.data.category}</span>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p className="aqi-station-loading">Unavailable</p>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                </section>
             )}
-        </div>
+        </>
     );
 };
 
