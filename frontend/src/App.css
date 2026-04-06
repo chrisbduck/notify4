@@ -206,12 +206,11 @@
 
 .main-content-cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(200px, 250px));
+  grid-template-columns: repeat(3, 200px);
   width: fit-content;
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
-  justify-content: center;
   gap: 20px;
   margin-bottom: 24px;
   align-items: start;

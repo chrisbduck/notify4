@@ -12,8 +12,8 @@
   padding: 15px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   text-align: center;
-  width: 200px;
-  min-height: 250px;
+  width: 100%;
+  min-height: 272px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
