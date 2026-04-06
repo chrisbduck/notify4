@@ -206,17 +206,19 @@ function App() {
     return (
         <div className="app-shell">
             <header className="app-header">
-                <div>
+                <div className="app-header-copy">
                     <p className="eyebrow">Notify4</p>
                     <h1>Alerts for Chris</h1>
-                    <p className="header-copy">
-                        Daily transit, weather, and air quality checks with a built-in admin/testing panel.
-                    </p>
-                </div>
-                <div className="header-meta">
-                    {loading ? <p>Loading alerts...</p> : lastFetched && <p>Last updated: {lastFetched}</p>}
                 </div>
             </header>
+
+            <div className="status-bar" aria-live="polite">
+                {loading ? (
+                    <p className="status-pill-text">Refreshing alerts...</p>
+                ) : lastFetched ? (
+                    <p className="status-pill-text">Updated {lastFetched}</p>
+                ) : null}
+            </div>
 
             <section className="main-content-cards">
                 <AlertSummaryCard loading={loading} alerts={alerts} />

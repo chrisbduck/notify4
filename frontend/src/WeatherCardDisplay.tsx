@@ -13,14 +13,14 @@ interface WeatherDetailsProps {
 const WeatherDetails: React.FC<WeatherDetailsProps> = ({ icon, temperature, temperatureUnit, shortForecast }) => (
     <div className="weather-details">
         <WeatherIcon iconName={icon} className="weather-icon" />
-        <p>{temperature}°{temperatureUnit}</p>
-        <p>{formatForecastText(shortForecast)}</p>
+        <p className="weather-temperature">{temperature}°{temperatureUnit}</p>
+        <p className="weather-forecast">{formatForecastText(shortForecast)}</p>
     </div>
 );
 
 function MinMaxTemperatureDisplay({ minTemperature, maxTemperature, temperatureUnit }: { minTemperature?: number; maxTemperature?: number; temperatureUnit?: string }) {
     if (minTemperature === undefined || temperatureUnit === undefined) return null;
-    return <p>Min/Max: {minTemperature}°{temperatureUnit} / {maxTemperature}°{temperatureUnit}</p>;
+    return <p className="weather-supporting-text">Min/Max: {minTemperature}°{temperatureUnit} / {maxTemperature}°{temperatureUnit}</p>;
 }
 
 function WindAlertBanner({ maxWindSpeed }: { maxWindSpeed?: number }) {
@@ -39,13 +39,13 @@ function WindDisplay({ averageWindSpeed, maxWindSpeed }: { averageWindSpeed?: nu
     if (averageWindSpeed === undefined || maxWindSpeed === undefined) return null;
     if (maxWindSpeed < 20) return null; // don't display anything for light winds
     const description = getWindDescription(maxWindSpeed);
-    return <p>{description}: {averageWindSpeed.toFixed(1)} / {maxWindSpeed.toFixed(1)} mph</p>;
+    return <p className="weather-supporting-text">{description}: {averageWindSpeed.toFixed(1)} / {maxWindSpeed.toFixed(1)} mph</p>;
 }
 
 function PrecipitationDisplay({ probabilityOfPrecipitation, precipitationType, precipitationStartTime }: { probabilityOfPrecipitation?: number; precipitationType?: string; precipitationStartTime?: Date }) {
     if (probabilityOfPrecipitation === undefined || probabilityOfPrecipitation <= 0) return null;
     const startTimeString = precipitationStartTime ? ` (~${precipitationStartTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})` : '';
-    return <p>{formatPrecipitationType(precipitationType)}: {probabilityOfPrecipitation}%{startTimeString}</p>;
+    return <p className="weather-supporting-text">{formatPrecipitationType(precipitationType)}: {probabilityOfPrecipitation}%{startTimeString}</p>;
 }
 
 interface WeatherCardProps {
@@ -66,13 +66,13 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
 
     return (
         <div className="weather-card">
-            <h3 className="weather-title">{city}</h3>
-            <WindAlertBanner maxWindSpeed={currentWeather.maxWindSpeed} />
-            <div className="weather-details-container">
-                <div className="weather-details-column">
-                    <h4>Now</h4>
-                    <WeatherDetails
-                        icon={currentWeather.icon}
+                <h3 className="weather-title">{city}</h3>
+                <WindAlertBanner maxWindSpeed={currentWeather.maxWindSpeed} />
+                <div className="weather-details-container">
+                    <div className="weather-details-column weather-details-column-current">
+                        <h4>Now</h4>
+                        <WeatherDetails
+                            icon={currentWeather.icon}
                         temperature={currentWeather.temperature}
                         temperatureUnit={currentWeather.temperatureUnit}
                         shortForecast={currentWeather.shortForecast}
@@ -89,9 +89,9 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
                         />
                     </div>
                 )}
-            </div>
-            <MinMaxTemperatureDisplay minTemperature={currentWeather.minTemperature} maxTemperature={currentWeather.maxTemperature} temperatureUnit={currentWeather.temperatureUnit} />
-            <WindDisplay averageWindSpeed={currentWeather.averageWindSpeed} maxWindSpeed={currentWeather.maxWindSpeed} />
+                </div>
+                <MinMaxTemperatureDisplay minTemperature={currentWeather.minTemperature} maxTemperature={currentWeather.maxTemperature} temperatureUnit={currentWeather.temperatureUnit} />
+                <WindDisplay averageWindSpeed={currentWeather.averageWindSpeed} maxWindSpeed={currentWeather.maxWindSpeed} />
             <PrecipitationDisplay precipitationStartTime={currentWeather.precipitationStartTime} precipitationType={currentWeather.precipitationType} probabilityOfPrecipitation={currentWeather.probabilityOfPrecipitation} />
         </div>
     );
