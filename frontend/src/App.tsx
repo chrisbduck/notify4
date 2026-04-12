@@ -251,7 +251,7 @@ function App() {
         setSeattleWeather4pm(null);
     }, [shouldUseMockWeatherData]);
 
-    usePolling(fetchSeattleWeather, 300000);
+    usePolling(fetchSeattleWeather, 300000, `seattle-weather:${shouldUseMockWeatherData ? 'mock' : 'live'}`);
 
     const fetchAlerts = useCallback(async () => {
         setLoading(true);
@@ -268,7 +268,7 @@ function App() {
         }
     }, [shouldUseMockTransitData]);
 
-    usePolling(fetchAlerts, 60000);
+    usePolling(fetchAlerts, 60000, `alerts:${shouldUseMockTransitData ? 'mock' : 'live'}`);
 
     return (
         <div className="app-shell">

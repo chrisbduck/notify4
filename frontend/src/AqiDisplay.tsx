@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { getAqiDataForLocation, type AqiData } from './aqiService';
+import { usePolling } from './hooks/usePolling';
 import './AqiDisplay.css';
 
 const AQI_CATEGORY_ORDER = [
@@ -67,25 +68,20 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
     const [isLoading, setIsLoading] = useState(true);
     const [isExpanded, setIsExpanded] = useState(false);
 
-    useEffect(() => {
-        const fetchAqiData = async () => {
-            setIsLoading(true);
-            const [nkData, sdData, mtData] = await Promise.all([
-                getAqiDataForLocation('north-kirkland', mockData),
-                getAqiDataForLocation('seattle-downtown', mockData),
-                getAqiDataForLocation('mountlake-terrace', mockData),
-            ]);
-            setNkAqi(nkData);
-            setSdAqi(sdData);
-            setMtAqi(mtData);
-            setIsLoading(false);
-        };
-
-        fetchAqiData();
-        const interval = setInterval(fetchAqiData, 300000);
-
-        return () => clearInterval(interval);
+    const fetchAqiData = useCallback(async () => {
+        setIsLoading(true);
+        const [nkData, sdData, mtData] = await Promise.all([
+            getAqiDataForLocation('north-kirkland', mockData),
+            getAqiDataForLocation('seattle-downtown', mockData),
+            getAqiDataForLocation('mountlake-terrace', mockData),
+        ]);
+        setNkAqi(nkData);
+        setSdAqi(sdData);
+        setMtAqi(mtData);
+        setIsLoading(false);
     }, [mockData]);
+
+    usePolling(fetchAqiData, 300000, `aqi-display:${mockData ? 'mock' : 'live'}`);
 
     const locations = useMemo<LocationEntry[]>(
         () => [
