@@ -243,17 +243,24 @@ def aqi():
         return create_json_error(f"Unexpected error: {exc}", 500)
 
 
-@app.route("/api/download-alerts", methods=["GET"])
+@app.route("/api/download-alerts", methods=["POST"])
 def download_alerts():
     """Download and log alerts from Sound Transit feed"""
     url = "https://s3.amazonaws.com/st-service-alerts-prod/alerts_pb.json"
+    payload = request.get_json(silent=True) or {}
+    message = payload.get("message")
+    message = message.strip() if isinstance(message, str) else ""
+
     try:
         response = requests.get(url, timeout=20)
         response.raise_for_status()
-        logger.info("Downloaded alerts content: %s", response.text)
+        if message:
+            logger.info("Downloaded alerts content with operator note: %s | payload: %s", message, response.text)
+        else:
+            logger.info("Downloaded alerts content: %s", response.text)
         return jsonify({
             "status": "success",
-            "message": "Alerts downloaded and logged successfully",
+            "message": "Alerts saved for future inspection.",
             "bytes": len(response.text),
         })
     except requests.RequestException as e:

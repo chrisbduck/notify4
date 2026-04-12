@@ -15,11 +15,25 @@ import { MockDataToggle } from './MockDataToggle';
 interface EndpointResult {
     status: 'idle' | 'loading' | 'success' | 'error';
     label: string;
+    successText?: string;
     body?: unknown;
     error?: string;
 }
 
+interface EndpointCallOptions {
+    method?: 'GET' | 'POST';
+    payload?: unknown;
+    getSuccessText?: (body: unknown) => string;
+}
+
 const ADMIN_PANEL_STORAGE_KEY = 'notify4AdminPanelExpanded';
+
+function getStringPropertyOrDefault(obj: unknown, propName: string, defaultValue: string): string {
+    if (typeof obj === 'object' && obj !== null && propName in obj && typeof obj[propName as keyof typeof obj] === 'string') {
+        return obj[propName as keyof typeof obj] as string;
+    }
+    return defaultValue;
+}
 
 function AdminTestingPanel({
     shouldUseMockTransitData,
@@ -41,9 +55,10 @@ function AdminTestingPanel({
     });
     const [results, setResults] = useState<Record<string, EndpointResult>>({
         test1: { status: 'idle', label: 'Test endpoint' },
-        downloadAlerts: { status: 'idle', label: 'Download alerts' },
+        downloadAlerts: { status: 'idle', label: 'Save alerts for future inspection' },
         health: { status: 'idle', label: 'Health check' },
     });
+    const [downloadAlertsMessage, setDownloadAlertsMessage] = useState('');
 
     const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
@@ -51,14 +66,20 @@ function AdminTestingPanel({
         localStorage.setItem(ADMIN_PANEL_STORAGE_KEY, String(isExpanded));
     }, [isExpanded]);
 
-    const callEndpoint = async (key: string, label: string, path: string) => {
-        setResults((current) => ({
-            ...current,
-            [key]: { status: 'loading', label },
-        }));
+    const callEndpoint = async (
+        key: string,
+        label: string,
+        path: string,
+        options: EndpointCallOptions = {},
+    ) => {
+        setResults((current) => ({ ...current, [key]: { status: 'loading', label } }));
 
         try {
-            const response = await fetch(path);
+            const response = await fetch(path, {
+                method: options.method ?? 'GET',
+                headers: options.payload ? { 'Content-Type': 'application/json' } : undefined,
+                body: options.payload ? JSON.stringify(options.payload) : undefined,
+            });
             const contentType = response.headers.get('content-type') ?? '';
             const body = contentType.includes('application/json') ? await response.json() : await response.text();
 
@@ -68,16 +89,12 @@ function AdminTestingPanel({
 
             setResults((current) => ({
                 ...current,
-                [key]: { status: 'success', label, body },
+                [key]: { status: 'success', label, body, successText: options.getSuccessText?.(body) },
             }));
         } catch (error) {
             setResults((current) => ({
                 ...current,
-                [key]: {
-                    status: 'error',
-                    label,
-                    error: error instanceof Error ? error.message : String(error),
-                },
+                [key]: { status: 'error', label, error: error instanceof Error ? error.message : String(error) },
             }));
         }
     };
@@ -97,32 +114,82 @@ function AdminTestingPanel({
             {isExpanded && (
                 <div className="admin-panel-body" id="admin-panel-body">
                     <div className="admin-actions">
-                        <button onClick={() => callEndpoint('test1', 'Test endpoint', '/api/test1')}>
-                            Run `test1`
-                        </button>
-                        <button onClick={() => callEndpoint('downloadAlerts', 'Download alerts', '/api/download-alerts')}>
-                            Run `download-alerts`
-                        </button>
-                        <button onClick={() => callEndpoint('health', 'Health check', '/api/health')}>
-                            Run health check
-                        </button>
+                        <div className="admin-action-buttons">
+                            {isLocalHost && (
+                                <button onClick={() => callEndpoint('test1', 'Test endpoint', '/api/test1')}>
+                                    Run `test1`
+                                </button>
+                            )}
+                            <button
+                                onClick={() =>
+                                    callEndpoint('health', 'Health check', '/api/health', {
+                                        getSuccessText: (body) => {
+                                            return getStringPropertyOrDefault(body, 'status', 'Health check succeeded.');
+                                        },
+                                    })
+                                }
+                            >
+                                Run health check
+                            </button>
+                        </div>
+                        <div className="admin-action-group">
+                            <label className="admin-input-label" htmlFor="download-alerts-message">
+                                Save alerts for future inspection
+                            </label>
+                            <div className="admin-action-input-row">
+                                <input
+                                    id="download-alerts-message"
+                                    type="text"
+                                    value={downloadAlertsMessage}
+                                    onChange={(event) => setDownloadAlertsMessage(event.target.value)}
+                                    placeholder="Optional note about why these alerts matter"
+                                />
+                                <button
+                                    onClick={() =>
+                                        callEndpoint(
+                                            'downloadAlerts',
+                                            'Save alerts for future inspection',
+                                            '/api/download-alerts',
+                                            {
+                                                method: 'POST',
+                                                payload: { message: downloadAlertsMessage.trim() || undefined },
+                                                getSuccessText: (body) => {
+                                                    return getStringPropertyOrDefault(body, 'message', 'Alerts saved for future inspection.');
+                                                },
+                                            },
+                                        )
+                                    }
+                                >
+                                    Save alerts
+                                </button>
+                            </div>
+                            <p className="admin-helper-text">
+                                Optionally attach context so the saved snapshot is easier to interpret later.
+                            </p>
+                        </div>
                     </div>
 
                     <div className="admin-results">
-                        {Object.entries(results).map(([key, result]) => (
-                            <div className="admin-result-card" key={key}>
-                                <div className="admin-result-header">
-                                    <h3>{result.label}</h3>
-                                    <span className={`status-pill status-${result.status}`}>{result.status}</span>
+                        {Object.entries(results)
+                            .filter(([key]) => isLocalHost || key !== 'test1')
+                            .map(([key, result]) => (
+                                <div className="admin-result-card" key={key}>
+                                    <div className="admin-result-header">
+                                        <h3>{result.label}</h3>
+                                        <span className={`status-pill status-${result.status}`}>{result.status}</span>
+                                    </div>
+                                    {result.status === 'idle' && <p>Run this action to inspect the current response.</p>}
+                                    {result.status === 'loading' && <p>Request in progress...</p>}
+                                    {result.status === 'error' && <p className="admin-error">{result.error}</p>}
+                                    {result.status === 'success' && (
+                                        result.successText ? (
+                                            <p className="admin-success-text">{result.successText}</p>
+                                        ) : (
+                                            <pre>{JSON.stringify(result.body, null, 2)}</pre>
+                                        )
+                                    )}
                                 </div>
-                                {result.status === 'idle' && <p>Run this action to inspect the current response.</p>}
-                                {result.status === 'loading' && <p>Request in progress...</p>}
-                                {result.status === 'error' && <p className="admin-error">{result.error}</p>}
-                                {result.status === 'success' && (
-                                    <pre>{JSON.stringify(result.body, null, 2)}</pre>
-                                )}
-                            </div>
-                        ))}
+                            ))}
                     </div>
 
                     {isLocalHost && (

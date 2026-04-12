@@ -88,9 +88,8 @@
 }
 
 .admin-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: grid;
+  gap: 16px;
   margin-bottom: 18px;
 }
 
@@ -98,6 +97,57 @@
   background: #0f172a;
   color: #e2e8f0;
   border: 1px solid #35506d;
+}
+
+.admin-action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-action-group {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-input-label {
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.admin-action-input-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-action-input-row input {
+  flex: 1 1 240px;
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid #35506d;
+  background: #020617;
+  color: #e2e8f0;
+  padding: 0.72em 0.9em;
+  font: inherit;
+}
+
+.admin-action-input-row input::placeholder {
+  color: #7f93ab;
+}
+
+.admin-action-input-row input:focus,
+.admin-action-input-row input:focus-visible {
+  outline: 3px solid rgba(125, 211, 252, 0.2);
+  outline-offset: 2px;
+  border-color: #7dd3fc;
+}
+
+.admin-helper-text {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
 }
 
 .admin-results {
@@ -134,6 +184,16 @@
 .mock-state-summary {
   margin: 0;
   color: #bfd3ea;
+}
+
+.admin-success-text {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.9);
+  border: 1px solid rgba(125, 211, 252, 0.12);
+  color: #d9f99d;
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
 .admin-result-card pre {
@@ -240,6 +300,19 @@
     width: 100%;
     gap: 10px;
     align-items: stretch;
+  }
+
+  .admin-action-input-row {
+    flex-direction: column;
+  }
+
+  .admin-action-buttons {
+    flex-direction: column;
+  }
+
+  .admin-action-buttons button,
+  .admin-action-input-row button {
+    width: 100%;
   }
 }
 
