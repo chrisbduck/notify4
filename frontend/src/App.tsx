@@ -185,9 +185,6 @@ function AdminTestingPanel({
                                     Save alerts
                                 </button>
                             </div>
-                            <p className="admin-helper-text">
-                                Optionally attach context so the saved snapshot is easier to interpret later.
-                            </p>
                         </div>
                     </div>
 
