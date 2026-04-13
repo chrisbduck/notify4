@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import './App.css';
 import WeatherCardDisplay from './WeatherCardDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
@@ -50,6 +50,7 @@ function AdminTestingPanel({
     onToggleWeatherMock: () => void;
     onToggleAqiMock: () => void;
 }) {
+    const downloadAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
     const [isExpanded, setIsExpanded] = useState<boolean>(() => {
         return localStorage.getItem(ADMIN_PANEL_STORAGE_KEY) === 'true';
     });
@@ -65,6 +66,27 @@ function AdminTestingPanel({
     useEffect(() => {
         localStorage.setItem(ADMIN_PANEL_STORAGE_KEY, String(isExpanded));
     }, [isExpanded]);
+
+    useEffect(() => {
+        const textarea = downloadAlertsMessageRef.current;
+        if (!textarea) return;
+
+        const computedStyle = window.getComputedStyle(textarea);
+        const lineHeight = Number.parseFloat(computedStyle.lineHeight) || 22;
+        const paddingTop = Number.parseFloat(computedStyle.paddingTop) || 0;
+        const paddingBottom = Number.parseFloat(computedStyle.paddingBottom) || 0;
+        const borderTop = Number.parseFloat(computedStyle.borderTopWidth) || 0;
+        const borderBottom = Number.parseFloat(computedStyle.borderBottomWidth) || 0;
+        const singleLineHeight = lineHeight + paddingTop + paddingBottom + borderTop + borderBottom;
+
+        if (!downloadAlertsMessage.trim()) {
+            textarea.style.height = `${singleLineHeight}px`;
+            return;
+        }
+
+        textarea.style.height = `${singleLineHeight}px`;
+        textarea.style.height = `${Math.max(textarea.scrollHeight, singleLineHeight)}px`;
+    }, [downloadAlertsMessage, isExpanded]);
 
     const callEndpoint = async (
         key: string,
@@ -137,13 +159,21 @@ function AdminTestingPanel({
                                 Save alerts for future inspection
                             </label>
                             <div className="admin-action-input-row">
-                                <input
-                                    id="download-alerts-message"
-                                    type="text"
-                                    value={downloadAlertsMessage}
-                                    onChange={(event) => setDownloadAlertsMessage(event.target.value)}
-                                    placeholder="Optional note about why these alerts matter"
-                                />
+                                <div className="admin-textarea-wrap">
+                                    <textarea
+                                        ref={downloadAlertsMessageRef}
+                                        id="download-alerts-message"
+                                        value={downloadAlertsMessage}
+                                        onChange={(event) => setDownloadAlertsMessage(event.target.value)}
+                                        aria-label="Optional note about why these alerts matter"
+                                        rows={1}
+                                    />
+                                    {!downloadAlertsMessage && (
+                                        <span className="admin-textarea-placeholder">
+                                            Optional note about why these alerts matter
+                                        </span>
+                                    )}
+                                </div>
                                 <button
                                     onClick={() =>
                                         callEndpoint(
