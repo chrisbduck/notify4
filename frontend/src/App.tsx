@@ -71,22 +71,14 @@ function AdminTestingPanel({
         const textarea = downloadAlertsMessageRef.current;
         if (!textarea) return;
 
-        const computedStyle = window.getComputedStyle(textarea);
-        const lineHeight = Number.parseFloat(computedStyle.lineHeight) || 22;
-        const paddingTop = Number.parseFloat(computedStyle.paddingTop) || 0;
-        const paddingBottom = Number.parseFloat(computedStyle.paddingBottom) || 0;
-        const borderTop = Number.parseFloat(computedStyle.borderTopWidth) || 0;
-        const borderBottom = Number.parseFloat(computedStyle.borderBottomWidth) || 0;
-        const singleLineHeight = lineHeight + paddingTop + paddingBottom + borderTop + borderBottom;
-
         if (!downloadAlertsMessage.trim()) {
-            textarea.style.height = `${singleLineHeight}px`;
+            textarea.style.height = '';
             return;
         }
 
-        textarea.style.height = `${singleLineHeight}px`;
-        textarea.style.height = `${Math.max(textarea.scrollHeight, singleLineHeight)}px`;
-    }, [downloadAlertsMessage, isExpanded]);
+        textarea.style.height = '0px';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    }, [downloadAlertsMessage]);
 
     const callEndpoint = async (
         key: string,
