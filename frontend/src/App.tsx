@@ -3,6 +3,7 @@ import './App.css';
 import WeatherCardDisplay from './WeatherCardDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
 import AqiDisplay from './AqiDisplay';
+import { CarCommuteCard, CarCommuteDetailsSection, useCarCommuteData } from './CarCommuteDisplay';
 import { fetchAndProcessAlerts } from './alertService';
 import { type AlertModel } from './model';
 import { usePolling } from './hooks/usePolling';
@@ -58,6 +59,7 @@ function AdminTestingPanel({
         test1: { status: 'idle', label: 'Test endpoint' },
         downloadAlerts: { status: 'idle', label: 'Save alerts for future inspection' },
         health: { status: 'idle', label: 'Health check' },
+        wsdotCatalog: { status: 'idle', label: 'WSDOT travel-time catalog' },
     });
     const [downloadAlertsMessage, setDownloadAlertsMessage] = useState('');
 
@@ -144,6 +146,9 @@ function AdminTestingPanel({
                                 }
                             >
                                 Run health check
+                            </button>
+                            <button onClick={() => callEndpoint('wsdotCatalog', 'WSDOT travel-time catalog', '/api/wsdot/travel-times/catalog')}>
+                                Run WSDOT catalog
                             </button>
                         </div>
                         <div className="admin-action-group">
@@ -257,6 +262,8 @@ function App() {
     const [shouldUseMockAQIData, setShouldUseMockAQIData] = useShouldUseMockAQIData();
     const [isWeatherDetailsExpanded, setIsWeatherDetailsExpanded] = useState(false);
     const [isAqiDetailsExpanded, setIsAqiDetailsExpanded] = useState(false);
+    const [isCarCommuteDetailsExpanded, setIsCarCommuteDetailsExpanded] = useState(false);
+    const { corridors: carCommuteCorridors, isLoading: isCarCommuteLoading } = useCarCommuteData();
 
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
     const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -310,12 +317,14 @@ function App() {
 
             <section className="main-content-cards">
                 <AlertSummaryCard loading={loading} alerts={alerts} />
+                <CarCommuteCard corridors={carCommuteCorridors} isLoading={isCarCommuteLoading} isExpanded={isCarCommuteDetailsExpanded} onToggleExpanded={() => setIsCarCommuteDetailsExpanded((expanded) => !expanded)} />
                 <WeatherCardDisplay currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} onToggleExpanded={() => setIsWeatherDetailsExpanded((expanded) => !expanded)} />
                 <AqiDisplay mockData={shouldUseMockAQIData} isExpanded={isAqiDetailsExpanded} onToggleExpanded={() => setIsAqiDetailsExpanded((expanded) => !expanded)} />
             </section>
 
             <main className="dashboard-sections">
                 {error && <p className="page-error">{error}</p>}
+                <CarCommuteDetailsSection corridors={carCommuteCorridors} isExpanded={isCarCommuteDetailsExpanded} />
                 <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} />
                 <TransitAlertsSection loading={loading} alerts={alerts} />
             </main>

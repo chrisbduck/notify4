@@ -288,7 +288,7 @@
 
 .main-content-cards {
   display: grid;
-  grid-template-columns: repeat(3, 200px);
+  grid-template-columns: repeat(4, 200px);
   width: fit-content;
   max-width: 100%;
   margin-left: auto;
@@ -318,7 +318,7 @@
   }
 
   .main-content-cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
     gap: 10px;
     align-items: stretch;
@@ -340,6 +340,12 @@
   .admin-action-buttons button,
   .admin-action-input-row button {
     width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .main-content-cards {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
