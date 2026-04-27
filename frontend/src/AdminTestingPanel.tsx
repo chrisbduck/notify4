@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { isLocalHost } from './localEnvironment';
 import { MockDataToggle } from './MockDataToggle';
 
 interface EndpointResult {
@@ -28,16 +29,20 @@ export function AdminTestingPanel({
     shouldUseMockTransitData,
     shouldUseMockWeatherData,
     shouldUseMockAQIData,
+    shouldUseMockCarCommuteData,
     onToggleTransitMock,
     onToggleWeatherMock,
     onToggleAqiMock,
+    onToggleCarCommuteMock,
 }: {
     shouldUseMockTransitData: boolean;
     shouldUseMockWeatherData: boolean;
     shouldUseMockAQIData: boolean;
+    shouldUseMockCarCommuteData: boolean;
     onToggleTransitMock: () => void;
     onToggleWeatherMock: () => void;
     onToggleAqiMock: () => void;
+    onToggleCarCommuteMock: () => void;
 }) {
     const downloadTransitAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
     const downloadHighwayAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
@@ -55,7 +60,7 @@ export function AdminTestingPanel({
     const [downloadTransitAlertsMessage, setDownloadTransitAlertsMessage] = useState('');
     const [downloadHighwayAlertsMessage, setDownloadHighwayAlertsMessage] = useState('');
 
-    const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isLocal = isLocalHost();
 
     useEffect(() => {
         localStorage.setItem(ADMIN_PANEL_STORAGE_KEY, String(isExpanded));
@@ -136,7 +141,7 @@ export function AdminTestingPanel({
                 <div className="admin-panel-body" id="admin-panel-body">
                     <div className="admin-actions">
                         <div className="admin-action-buttons">
-                            {isLocalHost && (
+                            {isLocal && (
                                 <button onClick={() => callEndpoint('test1', 'Test endpoint', '/api/test1')}>
                                     Run `test1`
                                 </button>
@@ -243,7 +248,7 @@ export function AdminTestingPanel({
 
                     <div className="admin-results">
                         {Object.entries(results)
-                            .filter(([key]) => isLocalHost || key !== 'test1')
+                            .filter(([key]) => isLocal || key !== 'test1')
                             .map(([key, result]) => (
                                 <div className="admin-result-card" key={key}>
                                     <div className="admin-result-header">
@@ -264,7 +269,7 @@ export function AdminTestingPanel({
                             ))}
                     </div>
 
-                    {isLocalHost && (
+                    {isLocal && (
                         <div className="admin-mocks">
                             <div className="admin-mocks-header">
                                 <h3>Local Mock Data</h3>
@@ -286,11 +291,17 @@ export function AdminTestingPanel({
                                     onToggle={onToggleAqiMock}
                                     label="Mock AQI Data"
                                 />
+                                <MockDataToggle
+                                    enabled={shouldUseMockCarCommuteData}
+                                    onToggle={onToggleCarCommuteMock}
+                                    label="Mock Drive Data"
+                                />
                             </div>
                             <div className="mock-state-summary">
                                 <span>Transit: {shouldUseMockTransitData ? 'mock' : 'live'}</span>
                                 <span>Weather: {shouldUseMockWeatherData ? 'mock' : 'live'}</span>
                                 <span>AQI: {shouldUseMockAQIData ? 'mock' : 'live'}</span>
+                                <span>Drive: {shouldUseMockCarCommuteData ? 'mock' : 'live'}</span>
                             </div>
                         </div>
                     )}

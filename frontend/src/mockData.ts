@@ -3,6 +3,7 @@ import { useState } from "react";
 const MOCK_TRANSIT_DATA_KEY = 'useMockTransitAlerts';
 const MOCK_WEATHER_DATA_KEY = 'useMockWeatherAlerts';
 const MOCK_AQI_DATA_KEY = 'useMockAQIAlerts';
+const MOCK_CAR_COMMUTE_DATA_KEY = 'useMockCarCommuteAlerts';
 
 export function useMockData(key: string) {
     const [value, setValue] = useState<boolean>(() => {
@@ -30,4 +31,8 @@ export function useShouldUseMockWeatherData() {
 
 export function useShouldUseMockAQIData() {
     return useMockData(MOCK_AQI_DATA_KEY);
+}
+
+export function useShouldUseMockCarCommuteData() {
+    return useMockData(MOCK_CAR_COMMUTE_DATA_KEY);
 }

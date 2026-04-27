@@ -91,19 +91,33 @@ function getPlaceholderCorridors(): CorridorTravelTime[] {
 export function useCarCommuteData() {
     const [corridors, setCorridors] = useState<CorridorTravelTime[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const fetchCommuteData = useCallback(async () => {
+    const fetchCommuteData = useCallback(async (useMockData: boolean) => {
         setIsLoading(true);
-        setCorridors(await getCarCommuteData());
+        setError(null);
+        try {
+            setCorridors(await getCarCommuteData(useMockData));
+        } catch (fetchError) {
+            setCorridors([]);
+            setError('Drive data unavailable.');
+        }
         setIsLoading(false);
     }, []);
 
-    usePolling(fetchCommuteData, 300000, 'car-commute');
-
-    return { corridors, isLoading };
+    return { corridors, isLoading, error, fetchCommuteData };
 }
 
-export function CarCommuteCard({ corridors, isLoading, isExpanded, onToggleExpanded }: { corridors: CorridorTravelTime[]; isLoading: boolean; isExpanded: boolean; onToggleExpanded: () => void }) {
+export function usePolledCarCommuteData(useMockData: boolean) {
+    const { corridors, isLoading, error, fetchCommuteData } = useCarCommuteData();
+    const pollingFunction = useCallback(() => fetchCommuteData(useMockData), [fetchCommuteData, useMockData]);
+
+    usePolling(pollingFunction, 300000, `car-commute:${useMockData ? 'mock' : 'live'}`);
+
+    return { corridors, isLoading, error };
+}
+
+export function CarCommuteCard({ corridors, isLoading, error, isExpanded, onToggleExpanded }: { corridors: CorridorTravelTime[]; isLoading: boolean; error: string | null; isExpanded: boolean; onToggleExpanded: () => void }) {
     return (
         <button type="button" className="car-commute-card" onClick={onToggleExpanded} aria-expanded={isExpanded} aria-controls="car-commute-expanded-drawer">
             <div className="car-commute-header-row">
@@ -112,6 +126,7 @@ export function CarCommuteCard({ corridors, isLoading, isExpanded, onToggleExpan
             </div>
 
             {isLoading && <p className="car-commute-summary">Loading travel times...</p>}
+            {error && <p className="car-commute-error">{error}</p>}
 
             <div className="car-commute-list">
                 {(corridors.length ? corridors : getPlaceholderCorridors()).map((corridor) => {

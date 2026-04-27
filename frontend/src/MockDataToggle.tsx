@@ -1,4 +1,5 @@
 import React from 'react';
+import { isLocalHost } from './localEnvironment';
 
 interface MockDataToggleProps {
     enabled: boolean;
@@ -7,9 +8,7 @@ interface MockDataToggleProps {
 }
 
 export const MockDataToggle: React.FC<MockDataToggleProps> = ({ enabled, onToggle, label }) => {
-    const isLocalHost = window.location.href.includes('localhost');
-
-    if (!isLocalHost) return null;
+    if (!isLocalHost()) return null;
 
     return (
         <button

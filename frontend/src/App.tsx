@@ -4,14 +4,14 @@ import { AdminTestingPanel } from './AdminTestingPanel';
 import WeatherCardDisplay from './WeatherCardDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
 import AqiDisplay from './AqiDisplay';
-import { CarCommuteCard, CarCommuteDetailsSection, useCarCommuteData } from './CarCommuteDisplay';
+import { CarCommuteCard, CarCommuteDetailsSection, usePolledCarCommuteData } from './CarCommuteDisplay';
 import { fetchAndProcessAlerts } from './alertService';
 import { type AlertModel } from './model';
 import { usePolling } from './hooks/usePolling';
 import { TransitAlertsSection } from './TransitAlertsSection';
 import { getSeattleWeather, isBefore2PM, type WeatherData } from './weatherService';
 import { WeatherDetailsSection } from './WeatherDetailsSection';
-import { useShouldUseMockAQIData, useShouldUseMockTransitData, useShouldUseMockWeatherData } from './mockData';
+import { useShouldUseMockAQIData, useShouldUseMockCarCommuteData, useShouldUseMockTransitData, useShouldUseMockWeatherData } from './mockData';
 
 function App() {
     const [alerts, setAlerts] = useState<AlertModel[]>([]);
@@ -21,10 +21,11 @@ function App() {
     const [shouldUseMockTransitData, setShouldUseMockTransitData] = useShouldUseMockTransitData();
     const [shouldUseMockWeatherData, setShouldUseMockWeatherData] = useShouldUseMockWeatherData();
     const [shouldUseMockAQIData, setShouldUseMockAQIData] = useShouldUseMockAQIData();
+    const [shouldUseMockCarCommuteData, setShouldUseMockCarCommuteData] = useShouldUseMockCarCommuteData();
     const [isWeatherDetailsExpanded, setIsWeatherDetailsExpanded] = useState(false);
     const [isAqiDetailsExpanded, setIsAqiDetailsExpanded] = useState(false);
     const [isCarCommuteDetailsExpanded, setIsCarCommuteDetailsExpanded] = useState(false);
-    const { corridors: carCommuteCorridors, isLoading: isCarCommuteLoading } = useCarCommuteData();
+    const { corridors: carCommuteCorridors, isLoading: isCarCommuteLoading, error: carCommuteError } = usePolledCarCommuteData(shouldUseMockCarCommuteData);
 
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
     const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -78,7 +79,7 @@ function App() {
 
             <section className="main-content-cards">
                 <AlertSummaryCard loading={loading} alerts={alerts} />
-                <CarCommuteCard corridors={carCommuteCorridors} isLoading={isCarCommuteLoading} isExpanded={isCarCommuteDetailsExpanded} onToggleExpanded={() => setIsCarCommuteDetailsExpanded((expanded) => !expanded)} />
+                <CarCommuteCard corridors={carCommuteCorridors} isLoading={isCarCommuteLoading} error={carCommuteError} isExpanded={isCarCommuteDetailsExpanded} onToggleExpanded={() => setIsCarCommuteDetailsExpanded((expanded) => !expanded)} />
                 <WeatherCardDisplay currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} onToggleExpanded={() => setIsWeatherDetailsExpanded((expanded) => !expanded)} />
                 <AqiDisplay mockData={shouldUseMockAQIData} isExpanded={isAqiDetailsExpanded} onToggleExpanded={() => setIsAqiDetailsExpanded((expanded) => !expanded)} />
             </section>
@@ -94,9 +95,11 @@ function App() {
                 shouldUseMockTransitData={shouldUseMockTransitData}
                 shouldUseMockWeatherData={shouldUseMockWeatherData}
                 shouldUseMockAQIData={shouldUseMockAQIData}
+                shouldUseMockCarCommuteData={shouldUseMockCarCommuteData}
                 onToggleTransitMock={() => setShouldUseMockTransitData((value) => !value)}
                 onToggleWeatherMock={() => setShouldUseMockWeatherData((value) => !value)}
                 onToggleAqiMock={() => setShouldUseMockAQIData((value) => !value)}
+                onToggleCarCommuteMock={() => setShouldUseMockCarCommuteData((value) => !value)}
             />
         </div>
     );

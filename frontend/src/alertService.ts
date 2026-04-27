@@ -1,13 +1,12 @@
 import type { AlertModel, FeedMessage, InformedEntity } from './model';
 import { downgradeSeverity, Severity, sortBySeverity } from './model';
+import { isLocalHost } from './localEnvironment';
 import mockAlertsData from './testdata/transit/mockAlerts.json';
 
 const IMPORTANT_ROUTE_IDS = new Set(["100479", "1LINE", "2LINE"]);
 
-const isLocalHost: boolean = window.location.href.includes('localhost');
-
 // Control constant for enabling severity override for testing
-const ENABLE_SEVERITY_OVERRIDE_FOR_TESTING = isLocalHost && false;
+const ENABLE_SEVERITY_OVERRIDE_FOR_TESTING = isLocalHost() && false;
 
 const _overrideAlertSeveritiesForTesting = (alertsToModify: AlertModel[]): AlertModel[] => {
     const severityLevels = [Severity.INFO, Severity.WARNING, Severity.SEVERE, Severity.UNKNOWN_SEVERITY];

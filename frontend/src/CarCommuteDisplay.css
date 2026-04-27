@@ -51,6 +51,13 @@
   color: #bbf7d0;
 }
 
+.car-commute-error {
+  margin: 0 0 12px;
+  color: #fca5a5;
+  font-size: 0.86rem;
+  line-height: 1.2;
+}
+
 .car-commute-list {
   display: grid;
   gap: 7px;
@@ -306,6 +313,10 @@
 
   .car-commute-summary {
     font-size: 0.8rem;
+  }
+
+  .car-commute-error {
+    font-size: 0.78rem;
   }
 
   .car-commute-list {

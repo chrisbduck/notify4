@@ -46,8 +46,6 @@ interface HighwayAlertsResponse {
     alerts: CorridorAlert[];
 }
 
-const useMockCarCommute = false;
-
 const MOCK_CORRIDORS: CorridorTravelTime[] = [
     {
         id: 520,
@@ -128,8 +126,6 @@ const MOCK_CORRIDORS: CorridorTravelTime[] = [
     },
 ];
 
-const isLocalHost = () => window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
 function withEmptyAlerts(corridors: CorridorTravelTime[]): CorridorTravelTime[] {
     return corridors.map((corridor) => ({ ...corridor, alerts: corridor.alerts ?? [] }));
 }
@@ -142,8 +138,8 @@ function mergeAlertsIntoCorridors(corridors: CorridorTravelTime[], alerts: Corri
     }));
 }
 
-export async function getCarCommuteData(): Promise<CorridorTravelTime[]> {
-    if (useMockCarCommute) {
+export async function getCarCommuteData(useMockData: boolean): Promise<CorridorTravelTime[]> {
+    if (useMockData) {
         return MOCK_CORRIDORS;
     }
 
@@ -168,10 +164,7 @@ export async function getCarCommuteData(): Promise<CorridorTravelTime[]> {
             return mergeAlertsIntoCorridors(corridors, [], true);
         }
     } catch (error) {
-        if (isLocalHost()) {
-            return MOCK_CORRIDORS;
-        }
         console.error('Error fetching WSDOT travel times:', error);
-        return [];
+        throw error;
     }
 }
