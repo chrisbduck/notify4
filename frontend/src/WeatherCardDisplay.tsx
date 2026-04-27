@@ -2,6 +2,7 @@ import React from 'react';
 import { formatForecastText, formatPrecipitationType, getWindDescription, type WeatherData } from './weatherService';
 import './WeatherCardDisplay.css';
 import { WeatherIcon } from './WeatherIcon';
+import { ExpandIndicator } from './CollapsibleContent';
 
 interface WeatherDetailsProps {
     icon: string;
@@ -52,27 +53,35 @@ interface WeatherCardProps {
     city: string;
     currentWeather: WeatherData | null;
     forecast4pm: WeatherData | null;
+    isExpanded: boolean;
+    onToggleExpanded: () => void;
 }
 
-const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecast4pm }) => {
+const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecast4pm, isExpanded, onToggleExpanded }) => {
     if (!currentWeather) {
         return (
-            <div className="weather-card">
-                <h3 className="weather-title">{city}</h3>
+            <button type="button" className="weather-card" onClick={onToggleExpanded} aria-expanded={isExpanded} aria-controls="weather-details-drawer">
+                <div className="weather-card-header-row">
+                    <h3 className="weather-title">{city}</h3>
+                    <ExpandIndicator isExpanded={isExpanded} />
+                </div>
                 <p>Loading weather...</p>
-            </div>
+            </button>
         );
     }
 
     return (
-        <div className="weather-card">
+        <button type="button" className="weather-card" onClick={onToggleExpanded} aria-expanded={isExpanded} aria-controls="weather-details-drawer">
+            <div className="weather-card-header-row">
                 <h3 className="weather-title">{city}</h3>
-                <WindAlertBanner maxWindSpeed={currentWeather.maxWindSpeed} />
-                <div className="weather-details-container">
-                    <div className="weather-details-column weather-details-column-current">
-                        <h4>Now</h4>
-                        <WeatherDetails
-                            icon={currentWeather.icon}
+                <ExpandIndicator isExpanded={isExpanded} />
+            </div>
+            <WindAlertBanner maxWindSpeed={currentWeather.maxWindSpeed} />
+            <div className="weather-details-container">
+                <div className="weather-details-column weather-details-column-current">
+                    <h4>Now</h4>
+                    <WeatherDetails
+                        icon={currentWeather.icon}
                         temperature={currentWeather.temperature}
                         temperatureUnit={currentWeather.temperatureUnit}
                         shortForecast={currentWeather.shortForecast}
@@ -89,26 +98,30 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ city, currentWeather, forecas
                         />
                     </div>
                 )}
-                </div>
-                <MinMaxTemperatureDisplay minTemperature={currentWeather.minTemperature} maxTemperature={currentWeather.maxTemperature} temperatureUnit={currentWeather.temperatureUnit} />
-                <WindDisplay averageWindSpeed={currentWeather.averageWindSpeed} maxWindSpeed={currentWeather.maxWindSpeed} />
+            </div>
+            <MinMaxTemperatureDisplay minTemperature={currentWeather.minTemperature} maxTemperature={currentWeather.maxTemperature} temperatureUnit={currentWeather.temperatureUnit} />
+            <WindDisplay averageWindSpeed={currentWeather.averageWindSpeed} maxWindSpeed={currentWeather.maxWindSpeed} />
             <PrecipitationDisplay precipitationStartTime={currentWeather.precipitationStartTime} precipitationType={currentWeather.precipitationType} probabilityOfPrecipitation={currentWeather.probabilityOfPrecipitation} />
-        </div>
+        </button>
     );
 };
 
 interface WeatherCardDisplayProps {
     currentWeather: WeatherData | null;
     forecast4pm: WeatherData | null;
+    isExpanded: boolean;
+    onToggleExpanded: () => void;
 }
 
-const WeatherCardDisplay: React.FC<WeatherCardDisplayProps> = ({ currentWeather, forecast4pm }) => {
+const WeatherCardDisplay: React.FC<WeatherCardDisplayProps> = ({ currentWeather, forecast4pm, isExpanded, onToggleExpanded }) => {
     return (
         <div className="weather-display-container">
             <WeatherCard
                 city="Seattle, WA"
                 currentWeather={currentWeather}
                 forecast4pm={forecast4pm}
+                isExpanded={isExpanded}
+                onToggleExpanded={onToggleExpanded}
             />
         </div>
     );

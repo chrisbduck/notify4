@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { getAqiDataForLocation, type AqiData } from './aqiService';
 import { usePolling } from './hooks/usePolling';
+import { CollapsibleContent, ExpandIndicator } from './CollapsibleContent';
 import './AqiDisplay.css';
 
 const AQI_CATEGORY_ORDER = [
@@ -52,6 +53,8 @@ const formatLocationSummary = (label: string, data: AqiData | null) => {
 
 interface AqiDisplayProps {
     mockData: boolean;
+    isExpanded: boolean;
+    onToggleExpanded: () => void;
 }
 
 interface LocationEntry {
@@ -61,12 +64,11 @@ interface LocationEntry {
     data: AqiData | null;
 }
 
-const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) => {
+const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData, isExpanded, onToggleExpanded }: AqiDisplayProps) => {
     const [nkAqi, setNkAqi] = useState<AqiData | null>(null);
     const [sdAqi, setSdAqi] = useState<AqiData | null>(null);
     const [mtAqi, setMtAqi] = useState<AqiData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isExpanded, setIsExpanded] = useState(false);
 
     const fetchAqiData = useCallback(async () => {
         setIsLoading(true);
@@ -115,19 +117,16 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
     return (
         <>
             <button
+                type="button"
                 className="aqi-combined-card"
-                onClick={() => setIsExpanded((expanded) => !expanded)}
+                onClick={onToggleExpanded}
                 aria-expanded={isExpanded}
                 aria-controls="aqi-expanded-drawer"
             >
                 <div className="aqi-card-layout">
                     <div className="aqi-header-row">
                         <h3>Air Quality</h3>
-                        <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="6 9 12 15 18 9"></polyline>
-                            </svg>
-                        </span>
+                        <ExpandIndicator isExpanded={isExpanded} />
                     </div>
 
                     <div className="aqi-main-content">
@@ -152,34 +151,32 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData }: AqiDisplayProps) =>
                 </div>
             </button>
 
-            {isExpanded && (
-                <section className="aqi-expanded-drawer" id="aqi-expanded-drawer">
-                    <div className="aqi-expanded-grid">
-                        {locations.map((location) => (
-                            <article className="aqi-station-card" key={location.id}>
-                                <div className="aqi-station-header">
-                                    <span className="aqi-location-name aqi-location-full">{location.fullName}</span>
-                                    <span className="aqi-location-name aqi-location-short">{location.shortName}</span>
-                                </div>
+            <CollapsibleContent className="aqi-expanded-drawer" id="aqi-expanded-drawer" isExpanded={isExpanded}>
+                <div className="aqi-expanded-grid">
+                    {locations.map((location) => (
+                        <article className="aqi-station-card" key={location.id}>
+                            <div className="aqi-station-header">
+                                <span className="aqi-location-name aqi-location-full">{location.fullName}</span>
+                                <span className="aqi-location-name aqi-location-short">{location.shortName}</span>
+                            </div>
 
-                                {location.data ? (
-                                    <>
-                                        <div className="aqi-station-reading">
-                                            <p className="aqi-station-value">{location.data.aqi.toFixed(1)}</p>
-                                            <div className="aqi-station-meta">
-                                                <span className={`aqi-dot aqi-circle-${location.data.category.toLowerCase().replace(/\s/g, '-')}`}></span>
-                                                <span className="aqi-station-category">{location.data.category}</span>
-                                            </div>
+                            {location.data ? (
+                                <>
+                                    <div className="aqi-station-reading">
+                                        <p className="aqi-station-value">{location.data.aqi.toFixed(1)}</p>
+                                        <div className="aqi-station-meta">
+                                            <span className={`aqi-dot aqi-circle-${location.data.category.toLowerCase().replace(/\s/g, '-')}`}></span>
+                                            <span className="aqi-station-category">{location.data.category}</span>
                                         </div>
-                                    </>
-                                ) : (
-                                    <p className="aqi-station-loading">Unavailable</p>
-                                )}
-                            </article>
-                        ))}
-                    </div>
-                </section>
-            )}
+                                    </div>
+                                </>
+                            ) : (
+                                <p className="aqi-station-loading">Unavailable</p>
+                            )}
+                        </article>
+                    ))}
+                </div>
+            </CollapsibleContent>
         </>
     );
 };

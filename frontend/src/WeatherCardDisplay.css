@@ -20,6 +20,8 @@
   gap: 8px;
   color: #e0e0e0;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  cursor: pointer;
+  font: inherit;
 }
 
 .weather-card:hover {
@@ -30,6 +32,18 @@
 .weather-card h3 {
   margin-top: 0;
   color: #e0e0e0;
+}
+
+.weather-card-header-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.weather-card-header-row h3 {
+  flex: 1;
+  margin-left: 24px;
+  text-align: center;
 }
 
 .weather-icon {
@@ -151,6 +165,10 @@
     margin-bottom: 2px;
     font-size: 0.95rem;
     line-height: 1.15;
+  }
+
+  .weather-card-header-row h3 {
+    margin-left: 18px;
   }
 
   .weather-alert-banner,

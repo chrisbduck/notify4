@@ -1,7 +1,8 @@
 import { isBefore2PM, type WeatherData, formatForecastText, formatPrecipitationType, getWindDescription } from "./weatherService";
 import TableDisplay, { type TableAttribute } from "./TableDisplay";
+import { CollapsibleContent } from "./CollapsibleContent";
 
-export function WeatherDetailsSection({ currentWeather, forecast4pm }: { currentWeather: WeatherData | null, forecast4pm: WeatherData | null }) {
+export function WeatherDetailsSection({ currentWeather, forecast4pm, isExpanded }: { currentWeather: WeatherData | null, forecast4pm: WeatherData | null, isExpanded: boolean }) {
     const weatherAttributes: TableAttribute<WeatherData>[] = [
         {
             label: 'Current temperature',
@@ -40,7 +41,7 @@ export function WeatherDetailsSection({ currentWeather, forecast4pm }: { current
     ];
 
     return (
-        <div className="weather-table-container">
+        <CollapsibleContent className="weather-table-container" id="weather-details-drawer" isExpanded={isExpanded}>
             <h2>Seattle Weather Forecast</h2>
             <TableDisplay
                 dataNow={currentWeather}
@@ -48,6 +49,6 @@ export function WeatherDetailsSection({ currentWeather, forecast4pm }: { current
                 attributes={weatherAttributes}
                 laterColumnHeader="4 PM"
             />
-        </div>
+        </CollapsibleContent>
     );
 }

@@ -255,6 +255,8 @@ function App() {
     const [shouldUseMockTransitData, setShouldUseMockTransitData] = useShouldUseMockTransitData();
     const [shouldUseMockWeatherData, setShouldUseMockWeatherData] = useShouldUseMockWeatherData();
     const [shouldUseMockAQIData, setShouldUseMockAQIData] = useShouldUseMockAQIData();
+    const [isWeatherDetailsExpanded, setIsWeatherDetailsExpanded] = useState(false);
+    const [isAqiDetailsExpanded, setIsAqiDetailsExpanded] = useState(false);
 
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
     const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -308,13 +310,13 @@ function App() {
 
             <section className="main-content-cards">
                 <AlertSummaryCard loading={loading} alerts={alerts} />
-                <WeatherCardDisplay currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
-                <AqiDisplay mockData={shouldUseMockAQIData} />
+                <WeatherCardDisplay currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} onToggleExpanded={() => setIsWeatherDetailsExpanded((expanded) => !expanded)} />
+                <AqiDisplay mockData={shouldUseMockAQIData} isExpanded={isAqiDetailsExpanded} onToggleExpanded={() => setIsAqiDetailsExpanded((expanded) => !expanded)} />
             </section>
 
             <main className="dashboard-sections">
                 {error && <p className="page-error">{error}</p>}
-                <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} />
+                <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} />
                 <TransitAlertsSection loading={loading} alerts={alerts} />
             </main>
 

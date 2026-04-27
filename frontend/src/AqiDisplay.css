@@ -120,28 +120,21 @@
   font-size: 0.92rem;
 }
 
-.expand-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  transition: transform 0.3s ease-in-out;
-}
-
-.expand-icon.expanded {
-  transform: rotate(180deg);
-}
-
 .aqi-expanded-drawer {
   grid-column: 1 / -1;
+  margin-top: -20px;
+}
+
+.aqi-expanded-drawer.expanded {
+  margin-top: -8px;
+}
+
+.aqi-expanded-drawer .collapsible-content-inner {
   border: 1px solid #444;
   border-radius: 14px;
   background: #2a2a2a;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   padding: 14px;
-  margin-top: -8px;
 }
 
 .aqi-expanded-grid {
@@ -244,11 +237,6 @@
     line-height: 1.1;
   }
 
-  .expand-icon {
-    width: 18px;
-    height: 18px;
-  }
-
   .aqi-circle {
     width: 42px;
     height: 42px;
@@ -270,8 +258,15 @@
   }
 
   .aqi-expanded-drawer {
-    padding: 12px;
+    margin-top: -10px;
+  }
+
+  .aqi-expanded-drawer.expanded {
     margin-top: 2px;
+  }
+
+  .aqi-expanded-drawer .collapsible-content-inner {
+    padding: 12px;
   }
 
   .aqi-expanded-grid {

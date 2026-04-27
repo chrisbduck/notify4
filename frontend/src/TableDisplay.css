@@ -1,11 +1,18 @@
 .weather-table-container {
+  color: white;
+  margin-bottom: 0;
+}
+
+.weather-table-container.expanded {
+  margin-bottom: 20px;
+}
+
+.weather-table-container .collapsible-content-inner {
   background-color: #282c34;
   border-radius: 8px;
   padding: 20px;
-  color: white;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  margin-bottom: 20px;
 }
 
 .weather-table {
