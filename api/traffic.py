@@ -22,13 +22,13 @@ DEFAULT_CORRIDOR_KEYWORDS = {
     "I-405": ("I-405", "I 405", "405"),
     "I-5 Downtown": ("I-5", "I 5", "5"),
 }
-CORRIDOR_ROUTES = {
-    "SR-520": ("520", "SR 520", "SR-520"),
-    "I-90": ("I-90", "I 90", "90"),
-    "I-405": ("I-405", "I 405", "405"),
-    "I-5 Downtown": ("I-5", "I 5", "5"),
+CORRIDOR_ALERT_CONFIG = {
+    "SR-520": {"road_names": ("520",), "milepost_min": 0, "milepost_max": 12},
+    "I-90": {"road_names": ("090", "90"), "milepost_min": 0, "milepost_max": 12},
+    "I-405": {"road_names": ("405",), "milepost_min": 12, "milepost_max": 23},
+    "I-5 Downtown": {"road_names": ("005", "5"), "milepost_min": 162, "milepost_max": 171},
 }
-RELEVANT_ALERT_CATEGORIES = ("collision", "disabled", "closure", "roadwork", "maintenance", "weather")
+RELEVANT_ALERT_CATEGORIES = ("collision", "incident", "disabled", "closure", "construction", "roadwork", "maintenance", "weather")
 PRIORITY_RANK = {
     "highest": 0,
     "high": 1,
@@ -169,27 +169,51 @@ def route_matches_keywords(route, keywords):
     return any(keyword.lower() in haystack for keyword in keywords)
 
 
-def alert_matches_keywords(alert, keywords):
+def normalize_road_name(value):
+    if value is None:
+        return ""
+    return str(value).strip().upper().lstrip("0") or "0"
+
+
+def get_alert_mileposts(alert):
     locations = [alert.get("StartRoadwayLocation"), alert.get("EndRoadwayLocation")]
-    location_text = " ".join(
-        str(location.get(field) or "")
-        for location in locations
-        if isinstance(location, dict)
-        for field in ("RoadName", "Description", "Direction")
-    )
-    haystack = " ".join(str(alert.get(field) or "") for field in ("HeadlineDescription", "ExtendedDescription", "EventCategory")) + " " + location_text
-    haystack = haystack.lower()
-    return any(keyword.lower() in haystack for keyword in keywords)
+    mileposts = []
+    for location in locations:
+        if not isinstance(location, dict):
+            continue
+        if location.get("Latitude") == 0 and location.get("Longitude") == 0:
+            continue
+        try:
+            mileposts.append(float(location.get("MilePost")))
+        except (TypeError, ValueError):
+            pass
+    return mileposts
+
+
+def alert_matches_corridor(alert, config):
+    locations = [alert.get("StartRoadwayLocation"), alert.get("EndRoadwayLocation")]
+    route_names = {normalize_road_name(location.get("RoadName")) for location in locations if isinstance(location, dict)}
+    configured_route_names = {normalize_road_name(route_name) for route_name in config["road_names"]}
+    if route_names.isdisjoint(configured_route_names):
+        return False
+
+    mileposts = get_alert_mileposts(alert)
+    if not mileposts:
+        return False
+    return any(config["milepost_min"] <= milepost <= config["milepost_max"] for milepost in mileposts)
 
 
 def is_relevant_alert(alert):
     category = str(alert.get("EventCategory") or "").lower()
+    priority_rank = PRIORITY_RANK.get(str(alert.get("Priority") or "").strip().lower(), 4)
+    if "maintenance" in category and priority_rank >= PRIORITY_RANK["medium"]:
+        return False
     return any(relevant in category for relevant in RELEVANT_ALERT_CATEGORIES)
 
 
 def get_alert_corridor_label(alert):
-    for label, keywords in CORRIDOR_ROUTES.items():
-        if alert_matches_keywords(alert, keywords):
+    for label, config in CORRIDOR_ALERT_CONFIG.items():
+        if alert_matches_corridor(alert, config):
             return label
     return None
 
