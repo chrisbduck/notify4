@@ -141,22 +141,26 @@ def normalize_wsdot_route(route, label: Optional[str] = None):
 
 
 def fetch_wsdot_travel_times(access_code: str):
-    response = requests.get(
+    session = requests.Session()
+    session.trust_env = False
+    response = session.get(
         f"{WSDOT_TRAVEL_TIMES_URL}?{urlencode({'AccessCode': access_code})}",
         timeout=20,
     )
     if not response.ok:
-        raise RuntimeError(f"WSDOT error {response.status_code}: {response.text}")
+        raise RuntimeError(f"WSDOT travel-times error {response.status_code}")
     return response.json()
 
 
 def fetch_wsdot_highway_alerts(access_code: str):
-    response = requests.get(
+    session = requests.Session()
+    session.trust_env = False
+    response = session.get(
         f"{WSDOT_HIGHWAY_ALERTS_URL}?{urlencode({'AccessCode': access_code})}",
         timeout=20,
     )
     if not response.ok:
-        raise RuntimeError(f"WSDOT error {response.status_code}: {response.text}")
+        raise RuntimeError(f"WSDOT highway-alerts error {response.status_code}")
     return response.json()
 
 
@@ -273,7 +277,8 @@ def wsdot_highway_alerts():
     except RuntimeError as exc:
         return create_json_error(str(exc), 502)
     except Exception as exc:
-        return create_json_error(f"Unexpected error: {exc}", 500)
+        logger.exception("Unexpected WSDOT highway-alerts error")
+        return create_json_error("Unexpected WSDOT highway-alerts error", 500)
 
 
 @traffic_bp.route("/api/wsdot/highway-alerts/log", methods=["POST"])
@@ -303,7 +308,8 @@ def log_wsdot_highway_alerts():
     except RuntimeError as exc:
         return create_json_error(str(exc), 502)
     except Exception as exc:
-        return create_json_error(f"Unexpected error: {exc}", 500)
+        logger.exception("Unexpected WSDOT highway-alerts log error")
+        return create_json_error("Unexpected WSDOT highway-alerts log error", 500)
 
 
 @traffic_bp.route("/api/wsdot/travel-times", methods=["GET"])
@@ -327,7 +333,8 @@ def wsdot_travel_times():
     except RuntimeError as exc:
         return create_json_error(str(exc), 502)
     except Exception as exc:
-        return create_json_error(f"Unexpected error: {exc}", 500)
+        logger.exception("Unexpected WSDOT travel-times error")
+        return create_json_error("Unexpected WSDOT travel-times error", 500)
 
 
 @traffic_bp.route("/api/wsdot/travel-times/catalog", methods=["GET"])
@@ -359,4 +366,5 @@ def wsdot_travel_times_catalog():
     except RuntimeError as exc:
         return create_json_error(str(exc), 502)
     except Exception as exc:
-        return create_json_error(f"Unexpected error: {exc}", 500)
+        logger.exception("Unexpected WSDOT travel-time catalog error")
+        return create_json_error("Unexpected WSDOT travel-time catalog error", 500)

@@ -17,7 +17,7 @@ except ImportError:
 
 def _configure_environment():
     project_root = Path(__file__).resolve().parent.parent
-    load_dotenv(project_root / ".env.local")
+    load_dotenv(project_root / ".env.local", override=True)
     load_dotenv(project_root / ".env")
     load_dotenv(Path(__file__).resolve().parent / ".env")
 
