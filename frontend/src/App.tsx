@@ -51,17 +51,21 @@ function AdminTestingPanel({
     onToggleWeatherMock: () => void;
     onToggleAqiMock: () => void;
 }) {
-    const downloadAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
+    const downloadTransitAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
+    const downloadHighwayAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
     const [isExpanded, setIsExpanded] = useState<boolean>(() => {
         return localStorage.getItem(ADMIN_PANEL_STORAGE_KEY) === 'true';
     });
     const [results, setResults] = useState<Record<string, EndpointResult>>({
         test1: { status: 'idle', label: 'Test endpoint' },
-        downloadAlerts: { status: 'idle', label: 'Save alerts for future inspection' },
+        downloadAlerts: { status: 'idle', label: 'Save transit alerts for future inspection' },
+        downloadHighwayAlerts: { status: 'idle', label: 'Save highway alerts for future inspection' },
         health: { status: 'idle', label: 'Health check' },
         wsdotCatalog: { status: 'idle', label: 'WSDOT travel-time catalog' },
+        wsdotHighwayAlerts: { status: 'idle', label: 'WSDOT highway alerts' },
     });
-    const [downloadAlertsMessage, setDownloadAlertsMessage] = useState('');
+    const [downloadTransitAlertsMessage, setDownloadTransitAlertsMessage] = useState('');
+    const [downloadHighwayAlertsMessage, setDownloadHighwayAlertsMessage] = useState('');
 
     const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
@@ -70,17 +74,30 @@ function AdminTestingPanel({
     }, [isExpanded]);
 
     useEffect(() => {
-        const textarea = downloadAlertsMessageRef.current;
+        const textarea = downloadTransitAlertsMessageRef.current;
         if (!textarea) return;
 
-        if (!downloadAlertsMessage.trim()) {
+        if (!downloadTransitAlertsMessage.trim()) {
             textarea.style.height = '';
             return;
         }
 
         textarea.style.height = '0px';
         textarea.style.height = `${textarea.scrollHeight}px`;
-    }, [downloadAlertsMessage]);
+    }, [downloadTransitAlertsMessage]);
+
+    useEffect(() => {
+        const textarea = downloadHighwayAlertsMessageRef.current;
+        if (!textarea) return;
+
+        if (!downloadHighwayAlertsMessage.trim()) {
+            textarea.style.height = '';
+            return;
+        }
+
+        textarea.style.height = '0px';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    }, [downloadHighwayAlertsMessage]);
 
     const callEndpoint = async (
         key: string,
@@ -150,22 +167,25 @@ function AdminTestingPanel({
                             <button onClick={() => callEndpoint('wsdotCatalog', 'WSDOT travel-time catalog', '/api/wsdot/travel-times/catalog')}>
                                 Run WSDOT catalog
                             </button>
+                            <button onClick={() => callEndpoint('wsdotHighwayAlerts', 'WSDOT highway alerts', '/api/wsdot/highway-alerts')}>
+                                Run WSDOT highway alerts
+                            </button>
                         </div>
                         <div className="admin-action-group">
-                            <label className="admin-input-label" htmlFor="download-alerts-message">
-                                Save alerts for future inspection
+                            <label className="admin-input-label" htmlFor="download-transit-alerts-message">
+                                Save transit alerts for future inspection
                             </label>
                             <div className="admin-action-input-row">
                                 <div className="admin-textarea-wrap">
                                     <textarea
-                                        ref={downloadAlertsMessageRef}
-                                        id="download-alerts-message"
-                                        value={downloadAlertsMessage}
-                                        onChange={(event) => setDownloadAlertsMessage(event.target.value)}
-                                        aria-label="Optional note about why these alerts matter"
+                                        ref={downloadTransitAlertsMessageRef}
+                                        id="download-transit-alerts-message"
+                                        value={downloadTransitAlertsMessage}
+                                        onChange={(event) => setDownloadTransitAlertsMessage(event.target.value)}
+                                        aria-label="Optional note about why these transit alerts matter"
                                         rows={1}
                                     />
-                                    {!downloadAlertsMessage && (
+                                    {!downloadTransitAlertsMessage && (
                                         <span className="admin-textarea-placeholder">
                                             Optional note about why these alerts matter
                                         </span>
@@ -175,11 +195,11 @@ function AdminTestingPanel({
                                     onClick={() =>
                                         callEndpoint(
                                             'downloadAlerts',
-                                            'Save alerts for future inspection',
+                                            'Save transit alerts for future inspection',
                                             '/api/download-alerts',
                                             {
                                                 method: 'POST',
-                                                payload: { message: downloadAlertsMessage.trim() || undefined },
+                                                payload: { message: downloadTransitAlertsMessage.trim() || undefined },
                                                 getSuccessText: (body) => {
                                                     return getStringPropertyOrDefault(body, 'message', 'Alerts saved for future inspection.');
                                                 },
@@ -187,7 +207,47 @@ function AdminTestingPanel({
                                         )
                                     }
                                 >
-                                    Save alerts
+                                    Save transit alerts
+                                </button>
+                            </div>
+                        </div>
+                        <div className="admin-action-group">
+                            <label className="admin-input-label" htmlFor="download-highway-alerts-message">
+                                Save highway alerts for future inspection
+                            </label>
+                            <div className="admin-action-input-row">
+                                <div className="admin-textarea-wrap">
+                                    <textarea
+                                        ref={downloadHighwayAlertsMessageRef}
+                                        id="download-highway-alerts-message"
+                                        value={downloadHighwayAlertsMessage}
+                                        onChange={(event) => setDownloadHighwayAlertsMessage(event.target.value)}
+                                        aria-label="Optional note about why these highway alerts matter"
+                                        rows={1}
+                                    />
+                                    {!downloadHighwayAlertsMessage && (
+                                        <span className="admin-textarea-placeholder">
+                                            Optional note about why these alerts matter
+                                        </span>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() =>
+                                        callEndpoint(
+                                            'downloadHighwayAlerts',
+                                            'Save highway alerts for future inspection',
+                                            '/api/wsdot/highway-alerts/log',
+                                            {
+                                                method: 'POST',
+                                                payload: { message: downloadHighwayAlertsMessage.trim() || undefined },
+                                                getSuccessText: (body) => {
+                                                    return getStringPropertyOrDefault(body, 'message', 'Highway alerts saved for future inspection.');
+                                                },
+                                            },
+                                        )
+                                    }
+                                >
+                                    Save highway alerts
                                 </button>
                             </div>
                         </div>

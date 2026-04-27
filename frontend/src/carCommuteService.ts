@@ -9,6 +9,19 @@ export interface RoadwayLocation {
     roadName?: string | null;
 }
 
+export interface CorridorAlert {
+    id: number | string | null;
+    corridorLabel: string;
+    category?: string | null;
+    priority?: string | null;
+    headline?: string | null;
+    description?: string | null;
+    status?: string | null;
+    updatedAt?: string | null;
+    start?: RoadwayLocation | null;
+    end?: RoadwayLocation | null;
+}
+
 export interface CorridorTravelTime {
     id: number | null;
     label: string;
@@ -21,10 +34,16 @@ export interface CorridorTravelTime {
     updatedAt?: string | null;
     start?: RoadwayLocation | null;
     end?: RoadwayLocation | null;
+    alerts: CorridorAlert[];
+    alertsUnavailable?: boolean;
 }
 
 interface TravelTimesResponse {
     corridors: CorridorTravelTime[];
+}
+
+interface HighwayAlertsResponse {
+    alerts: CorridorAlert[];
 }
 
 const useMockCarCommute = false;
@@ -40,6 +59,17 @@ const MOCK_CORRIDORS: CorridorTravelTime[] = [
         distanceMiles: 7.4,
         description: 'Mock SR-520 bridge and Seattle approach corridor.',
         updatedAt: new Date().toISOString(),
+        alerts: [
+            {
+                id: 5201,
+                corridorLabel: 'SR-520',
+                category: 'Collision',
+                priority: 'High',
+                headline: 'Blocking right lane near Montlake Blvd.',
+                status: 'Open',
+                updatedAt: new Date().toISOString(),
+            },
+        ],
     },
     {
         id: 90,
@@ -51,6 +81,7 @@ const MOCK_CORRIDORS: CorridorTravelTime[] = [
         distanceMiles: 10.8,
         description: 'Mock I-90 bridge and Seattle approach corridor.',
         updatedAt: new Date().toISOString(),
+        alerts: [],
     },
     {
         id: 405,
@@ -62,6 +93,7 @@ const MOCK_CORRIDORS: CorridorTravelTime[] = [
         distanceMiles: 8.2,
         description: 'Mock I-405 connector corridor near Bellevue/Kirkland.',
         updatedAt: new Date().toISOString(),
+        alerts: [],
     },
     {
         id: 5,
@@ -73,10 +105,42 @@ const MOCK_CORRIDORS: CorridorTravelTime[] = [
         distanceMiles: 3.1,
         description: 'Mock I-5 downtown Seattle segment.',
         updatedAt: new Date().toISOString(),
+        alerts: [
+            {
+                id: 501,
+                corridorLabel: 'I-5 Downtown',
+                category: 'Disabled Vehicle',
+                priority: 'Medium',
+                headline: 'Vehicle on shoulder near Mercer St.',
+                status: 'Open',
+                updatedAt: new Date().toISOString(),
+            },
+            {
+                id: 502,
+                corridorLabel: 'I-5 Downtown',
+                category: 'Maintenance',
+                priority: 'Low',
+                headline: 'Short-term lane restriction near downtown Seattle.',
+                status: 'Open',
+                updatedAt: new Date().toISOString(),
+            },
+        ],
     },
 ];
 
 const isLocalHost = () => window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+function withEmptyAlerts(corridors: CorridorTravelTime[]): CorridorTravelTime[] {
+    return corridors.map((corridor) => ({ ...corridor, alerts: corridor.alerts ?? [] }));
+}
+
+function mergeAlertsIntoCorridors(corridors: CorridorTravelTime[], alerts: CorridorAlert[], alertsUnavailable = false): CorridorTravelTime[] {
+    return corridors.map((corridor) => ({
+        ...corridor,
+        alerts: alerts.filter((alert) => alert.corridorLabel === corridor.label),
+        alertsUnavailable,
+    }));
+}
 
 export async function getCarCommuteData(): Promise<CorridorTravelTime[]> {
     if (useMockCarCommute) {
@@ -90,7 +154,19 @@ export async function getCarCommuteData(): Promise<CorridorTravelTime[]> {
         }
 
         const body: TravelTimesResponse = await response.json();
-        return body.corridors;
+        const corridors = withEmptyAlerts(body.corridors);
+
+        try {
+            const alertsResponse = await apiFetch('/wsdot/highway-alerts');
+            if (!alertsResponse.ok) {
+                throw new Error(`HTTP error ${alertsResponse.status}`);
+            }
+            const alertsBody: HighwayAlertsResponse = await alertsResponse.json();
+            return mergeAlertsIntoCorridors(corridors, alertsBody.alerts ?? []);
+        } catch (error) {
+            console.error('Error fetching WSDOT highway alerts:', error);
+            return mergeAlertsIntoCorridors(corridors, [], true);
+        }
     } catch (error) {
         if (isLocalHost()) {
             return MOCK_CORRIDORS;

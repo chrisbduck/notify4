@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { CollapsibleContent, ExpandIndicator } from './CollapsibleContent';
 import { usePolling } from './hooks/usePolling';
-import { getCarCommuteData, type CorridorTravelTime } from './carCommuteService';
+import { getCarCommuteData, type CorridorAlert, type CorridorTravelTime } from './carCommuteService';
 import './CarCommuteDisplay.css';
 
 type CorridorStatus = 'fast' | 'average' | 'slow' | 'heavy' | 'unavailable';
@@ -42,6 +42,41 @@ function formatStatus(status: CorridorStatus) {
     }
 }
 
+function formatCompactStatus(status: CorridorStatus) {
+    return status === 'average' ? 'Avg' : formatStatus(status);
+}
+
+function formatCardLabel(label: string) {
+    if (label === 'SR-520') return '520';
+    if (label === 'I-90') return '90';
+    if (label === 'I-405') return '405';
+    if (label === 'I-5 Downtown') return 'I-5';
+    return label;
+}
+
+function formatAlertMarker(alerts: CorridorAlert[]) {
+    if (alerts.length === 0) return '';
+    if (alerts.length === 1) return '+ alert';
+    return `+ ${alerts.length} alerts`;
+}
+
+function formatAlertPriority(priority?: string | null) {
+    if (!priority) return 'Unknown';
+    return priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
+}
+
+function getAlertSeverity(alert: CorridorAlert) {
+    const category = (alert.category ?? '').toLowerCase();
+    const priority = (alert.priority ?? '').toLowerCase();
+    if (priority === 'high' || priority === 'highest' || category.includes('collision') || category.includes('closure')) return 'high';
+    if (priority === 'medium' || category.includes('disabled')) return 'medium';
+    return 'low';
+}
+
+function getPlaceholderCorridors(): CorridorTravelTime[] {
+    return ['520', '90', '405', 'I-5'].map((label) => ({ id: null, label, currentMinutes: null, averageMinutes: null, delayMinutes: null, distanceMiles: null, alerts: [] }));
+}
+
 export function useCarCommuteData() {
     const [corridors, setCorridors] = useState<CorridorTravelTime[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -68,12 +103,16 @@ export function CarCommuteCard({ corridors, isLoading, isExpanded, onToggleExpan
             {isLoading && <p className="car-commute-summary">Loading travel times...</p>}
 
             <div className="car-commute-list">
-                {(corridors.length ? corridors : ['520', 'I-90', '405', 'I-5'].map((label) => ({ id: null, label, currentMinutes: null, averageMinutes: null, delayMinutes: null, distanceMiles: null }))).map((corridor) => {
+                {(corridors.length ? corridors : getPlaceholderCorridors()).map((corridor) => {
                     const status = getStatus(corridor);
+                    const alertMarker = formatAlertMarker(corridor.alerts);
                     return (
                         <div className={`car-commute-row car-commute-row-${status}`} key={corridor.label}>
-                            <span className="car-commute-label">{corridor.label.replace('SR-', '').replace('I-', '')}</span>
-                            <span className="car-commute-status-word">{formatStatus(status)}</span>
+                            <span className="car-commute-label">{formatCardLabel(corridor.label)}</span>
+                            <span className="car-commute-status-word">
+                                {formatCompactStatus(status)}
+                                {alertMarker && <span className="car-commute-alert-marker"> {alertMarker}</span>}
+                            </span>
                         </div>
                     );
                 })}
@@ -113,6 +152,29 @@ export function CarCommuteDetailsSection({ corridors, isExpanded }: { corridors:
                                     <dd>{corridor.distanceMiles === null ? '--' : `${Number(corridor.distanceMiles).toFixed(1)} mi`}</dd>
                                 </div>
                             </dl>
+                            <section className="car-commute-alerts-section">
+                                <h4>Alerts</h4>
+                                {corridor.alertsUnavailable ? (
+                                    <p className="car-commute-alert-empty">Alerts unavailable</p>
+                                ) : corridor.alerts.length === 0 ? (
+                                    <p className="car-commute-alert-empty">No active alerts</p>
+                                ) : (
+                                    <div className="car-commute-alert-list">
+                                        {corridor.alerts.map((alert) => {
+                                            const severity = getAlertSeverity(alert);
+                                            return (
+                                                <article className={`car-commute-alert car-commute-alert-${severity}`} key={alert.id ?? `${alert.category}-${alert.headline}`}>
+                                                    <div className="car-commute-alert-meta">
+                                                        <span>{alert.category || 'Alert'}</span>
+                                                        <span>{formatAlertPriority(alert.priority)}</span>
+                                                    </div>
+                                                    <p>{alert.headline || 'No headline available'}</p>
+                                                </article>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </section>
                         </article>
                     );
                 })}

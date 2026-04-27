@@ -54,36 +54,38 @@
 .car-commute-list {
   display: grid;
   gap: 7px;
-  margin-top: 28px;
+  margin-top: 14px;
 }
 
 .car-commute-row {
-  display: grid;
-  grid-template-columns: minmax(34px, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  min-height: 28px;
-  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+  min-height: 42px;
+  padding: 7px 10px;
   border: 1px solid #444;
   border-radius: 8px;
   background: #252525;
 }
 
 .car-commute-label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   color: #f0f0f0;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
+  line-height: 1.05;
 }
 
 .car-commute-status-word {
   color: #94a3b8;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  text-align: right;
+  line-height: 1.15;
+}
+
+.car-commute-alert-marker {
+  color: #cbd5e1;
+  font-weight: 600;
 }
 
 .car-commute-row-fast .car-commute-status-word,
@@ -194,6 +196,67 @@
   margin: 14px 0;
 }
 
+.car-commute-alerts-section {
+  border-top: 1px solid #444;
+  padding-top: 12px;
+}
+
+.car-commute-alerts-section h4 {
+  margin: 0 0 8px;
+  color: #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.car-commute-alert-empty {
+  margin: 0;
+  color: #bfd3ea;
+  font-size: 0.86rem;
+}
+
+.car-commute-alert-list {
+  display: grid;
+  gap: 8px;
+}
+
+.car-commute-alert {
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #202020;
+}
+
+.car-commute-alert-high {
+  border-color: rgba(248, 113, 113, 0.42);
+}
+
+.car-commute-alert-medium {
+  border-color: rgba(250, 204, 21, 0.34);
+}
+
+.car-commute-alert-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 5px;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.car-commute-alert-meta span + span::before {
+  content: "·";
+  margin-right: 6px;
+  color: #94a3b8;
+}
+
+.car-commute-alert p {
+  margin: 0;
+  color: #f0f0f0;
+  font-size: 0.86rem;
+  line-height: 1.32;
+}
+
 .car-commute-detail-list div {
   min-width: 0;
 }
@@ -232,6 +295,15 @@
   }
 
   .car-commute-row {
-    grid-template-columns: minmax(26px, 1fr) auto;
+    min-height: 38px;
+    padding: 6px 8px;
+  }
+
+  .car-commute-label {
+    font-size: 0.78rem;
+  }
+
+  .car-commute-status-word {
+    font-size: 0.72rem;
   }
 }

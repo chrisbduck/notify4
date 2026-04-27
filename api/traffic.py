@@ -1,3 +1,5 @@
+import json
+import logging
 import os
 import re
 import time
@@ -5,11 +7,13 @@ from typing import Dict, Optional
 from urllib.parse import urlencode
 
 import requests
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
 traffic_bp = Blueprint("traffic", __name__)
+logger = logging.getLogger("notify4")
 
 WSDOT_TRAVEL_TIMES_URL = "http://www.wsdot.wa.gov/Traffic/api/TravelTimes/TravelTimesREST.svc/GetTravelTimesAsJson"
+WSDOT_HIGHWAY_ALERTS_URL = "http://www.wsdot.wa.gov/Traffic/api/HighwayAlerts/HighwayAlertsREST.svc/GetAlertsAsJson"
 WSDOT_UNAVAILABLE_TIME = 2147483647
 WSDOT_DATE_PATTERN = re.compile(r"/Date\((-?\d+)(?:[+-]\d+)?\)/")
 DEFAULT_CORRIDOR_KEYWORDS = {
@@ -17,6 +21,19 @@ DEFAULT_CORRIDOR_KEYWORDS = {
     "I-90": ("I-90", "I 90", "90"),
     "I-405": ("I-405", "I 405", "405"),
     "I-5 Downtown": ("I-5", "I 5", "5"),
+}
+CORRIDOR_ROUTES = {
+    "SR-520": ("520", "SR 520", "SR-520"),
+    "I-90": ("I-90", "I 90", "90"),
+    "I-405": ("I-405", "I 405", "405"),
+    "I-5 Downtown": ("I-5", "I 5", "5"),
+}
+RELEVANT_ALERT_CATEGORIES = ("collision", "disabled", "closure", "roadwork", "maintenance", "weather")
+PRIORITY_RANK = {
+    "highest": 0,
+    "high": 1,
+    "medium": 2,
+    "low": 3,
 }
 
 
@@ -94,6 +111,15 @@ def normalize_wsdot_timestamp(value):
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(milliseconds / 1000))
 
 
+def get_timestamp_sort_value(updated_at):
+    if not isinstance(updated_at, str):
+        return 0
+    try:
+        return int(time.mktime(time.strptime(updated_at, "%Y-%m-%dT%H:%M:%SZ")))
+    except (TypeError, ValueError):
+        return 0
+
+
 def normalize_wsdot_route(route, label: Optional[str] = None):
     current_minutes = normalize_wsdot_time(route.get("CurrentTime"))
     average_minutes = normalize_wsdot_time(route.get("AverageTime"))
@@ -124,9 +150,76 @@ def fetch_wsdot_travel_times(access_code: str):
     return response.json()
 
 
+def fetch_wsdot_highway_alerts(access_code: str):
+    response = requests.get(
+        f"{WSDOT_HIGHWAY_ALERTS_URL}?{urlencode({'AccessCode': access_code})}",
+        timeout=20,
+    )
+    if not response.ok:
+        raise RuntimeError(f"WSDOT error {response.status_code}: {response.text}")
+    return response.json()
+
+
 def route_matches_keywords(route, keywords):
     haystack = " ".join(str(route.get(field) or "") for field in ("Name", "Description")).lower()
     return any(keyword.lower() in haystack for keyword in keywords)
+
+
+def alert_matches_keywords(alert, keywords):
+    locations = [alert.get("StartRoadwayLocation"), alert.get("EndRoadwayLocation")]
+    location_text = " ".join(
+        str(location.get(field) or "")
+        for location in locations
+        if isinstance(location, dict)
+        for field in ("RoadName", "Description", "Direction")
+    )
+    haystack = " ".join(str(alert.get(field) or "") for field in ("HeadlineDescription", "ExtendedDescription", "EventCategory")) + " " + location_text
+    haystack = haystack.lower()
+    return any(keyword.lower() in haystack for keyword in keywords)
+
+
+def is_relevant_alert(alert):
+    category = str(alert.get("EventCategory") or "").lower()
+    return any(relevant in category for relevant in RELEVANT_ALERT_CATEGORIES)
+
+
+def get_alert_corridor_label(alert):
+    for label, keywords in CORRIDOR_ROUTES.items():
+        if alert_matches_keywords(alert, keywords):
+            return label
+    return None
+
+
+def normalize_wsdot_alert(alert, corridor_label: str):
+    return {
+        "id": alert.get("AlertID"),
+        "corridorLabel": corridor_label,
+        "category": alert.get("EventCategory"),
+        "priority": alert.get("Priority"),
+        "headline": alert.get("HeadlineDescription"),
+        "description": alert.get("ExtendedDescription"),
+        "status": alert.get("EventStatus"),
+        "updatedAt": normalize_wsdot_timestamp(alert.get("LastUpdatedTime")),
+        "start": normalize_wsdot_location(alert.get("StartRoadwayLocation")),
+        "end": normalize_wsdot_location(alert.get("EndRoadwayLocation")),
+    }
+
+
+def select_corridor_alerts(alerts):
+    selected = []
+    for alert in alerts:
+        corridor_label = get_alert_corridor_label(alert)
+        if not corridor_label or not is_relevant_alert(alert):
+            continue
+        selected.append(normalize_wsdot_alert(alert, corridor_label))
+
+    return sorted(
+        selected,
+        key=lambda alert: (
+            PRIORITY_RANK.get(str(alert.get("priority") or "").strip().lower(), 4),
+            -get_timestamp_sort_value(alert.get("updatedAt")),
+        ),
+    )
 
 
 def select_corridor_routes(routes):
@@ -160,6 +253,57 @@ def select_corridor_routes(routes):
                 "end": None,
             })
     return selected
+
+
+@traffic_bp.route("/api/wsdot/highway-alerts", methods=["GET"])
+def wsdot_highway_alerts():
+    access_code = get_wsdot_access_code()
+    if not access_code:
+        return create_json_error("Server is not configured with WSDOT_ACCESS_CODE", 500)
+
+    try:
+        alerts = fetch_wsdot_highway_alerts(access_code)
+        if not isinstance(alerts, list):
+            return create_json_error("Unexpected WSDOT highway-alerts response", 502)
+
+        return jsonify({
+            "alerts": select_corridor_alerts(alerts),
+            "fetched_at": int(time.time()),
+        })
+    except RuntimeError as exc:
+        return create_json_error(str(exc), 502)
+    except Exception as exc:
+        return create_json_error(f"Unexpected error: {exc}", 500)
+
+
+@traffic_bp.route("/api/wsdot/highway-alerts/log", methods=["POST"])
+def log_wsdot_highway_alerts():
+    access_code = get_wsdot_access_code()
+    if not access_code:
+        return create_json_error("Server is not configured with WSDOT_ACCESS_CODE", 500)
+
+    payload = request.get_json(silent=True) or {}
+    message = payload.get("message")
+    message = message.strip() if isinstance(message, str) else ""
+
+    try:
+        alerts = fetch_wsdot_highway_alerts(access_code)
+        alert_json = json.dumps(alerts, ensure_ascii=True)
+        if message:
+            logger.info("Downloaded WSDOT highway alerts with operator note: %s | payload: %s", message, alert_json)
+        else:
+            logger.info("Downloaded WSDOT highway alerts: %s", alert_json)
+
+        alert_count = len(alerts) if isinstance(alerts, list) else 0
+        return jsonify({
+            "status": "success",
+            "message": "Highway alerts saved for future inspection.",
+            "count": alert_count,
+        })
+    except RuntimeError as exc:
+        return create_json_error(str(exc), 502)
+    except Exception as exc:
+        return create_json_error(f"Unexpected error: {exc}", 500)
 
 
 @traffic_bp.route("/api/wsdot/travel-times", methods=["GET"])
