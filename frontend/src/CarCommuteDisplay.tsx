@@ -1,4 +1,6 @@
 import React, { useCallback, useState } from 'react';
+import { FaCheckCircle, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
+import { TbAlertOctagonFilled } from 'react-icons/tb';
 import { CollapsibleContent, ExpandIndicator } from './CollapsibleContent';
 import { usePolling } from './hooks/usePolling';
 import { getCarCommuteData, type CorridorAlert, type CorridorTravelTime } from './carCommuteService';
@@ -54,12 +56,6 @@ function formatCardLabel(label: string) {
     return label;
 }
 
-function formatAlertMarker(alerts: CorridorAlert[]) {
-    if (alerts.length === 0) return '';
-    if (alerts.length === 1) return '+ alert';
-    return `+ ${alerts.length} alerts`;
-}
-
 function formatAlertPriority(priority?: string | null) {
     if (!priority) return 'Unknown';
     return priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
@@ -71,6 +67,21 @@ function getAlertSeverity(alert: CorridorAlert) {
     if (priority === 'high' || priority === 'highest' || category.includes('collision') || category.includes('closure')) return 'high';
     if (priority === 'medium' || category.includes('disabled')) return 'medium';
     return 'low';
+}
+
+function getWorstAlertSeverity(alerts: CorridorAlert[]) {
+    if (alerts.some((alert) => getAlertSeverity(alert) === 'high')) return 'high';
+    if (alerts.some((alert) => getAlertSeverity(alert) === 'medium')) return 'medium';
+    if (alerts.length > 0) return 'low';
+    return null;
+}
+
+function AlertSeverityIcon({ alerts }: { alerts: CorridorAlert[] }) {
+    const severity = getWorstAlertSeverity(alerts);
+    if (!severity) return <FaCheckCircle className="car-commute-alert-icon car-commute-alert-icon-clear" aria-label="No highway alerts" />;
+    if (severity === 'high') return <TbAlertOctagonFilled className="car-commute-alert-icon car-commute-alert-icon-high" aria-label="High severity highway alert" />;
+    if (severity === 'medium') return <FaExclamationTriangle className="car-commute-alert-icon car-commute-alert-icon-medium" aria-label="Medium severity highway alert" />;
+    return <FaInfoCircle className="car-commute-alert-icon car-commute-alert-icon-low" aria-label="Low severity highway alert" />;
 }
 
 function getPlaceholderCorridors(): CorridorTravelTime[] {
@@ -105,14 +116,11 @@ export function CarCommuteCard({ corridors, isLoading, isExpanded, onToggleExpan
             <div className="car-commute-list">
                 {(corridors.length ? corridors : getPlaceholderCorridors()).map((corridor) => {
                     const status = getStatus(corridor);
-                    const alertMarker = formatAlertMarker(corridor.alerts);
                     return (
                         <div className={`car-commute-row car-commute-row-${status}`} key={corridor.label}>
                             <span className="car-commute-label">{formatCardLabel(corridor.label)}</span>
-                            <span className="car-commute-status-word">
-                                {formatCompactStatus(status)}
-                                {alertMarker && <span className="car-commute-alert-marker"> {alertMarker}</span>}
-                            </span>
+                            <span className="car-commute-status-word">{formatCompactStatus(status)}</span>
+                            <AlertSeverityIcon alerts={corridor.alerts} />
                         </div>
                     );
                 })}

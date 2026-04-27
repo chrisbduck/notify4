@@ -1,0 +1,301 @@
+import { useEffect, useRef, useState } from 'react';
+import { MockDataToggle } from './MockDataToggle';
+
+interface EndpointResult {
+    status: 'idle' | 'loading' | 'success' | 'error';
+    label: string;
+    successText?: string;
+    body?: unknown;
+    error?: string;
+}
+
+interface EndpointCallOptions {
+    method?: 'GET' | 'POST';
+    payload?: unknown;
+    getSuccessText?: (body: unknown) => string;
+}
+
+const ADMIN_PANEL_STORAGE_KEY = 'notify4AdminPanelExpanded';
+
+function getStringPropertyOrDefault(obj: unknown, propName: string, defaultValue: string): string {
+    if (typeof obj === 'object' && obj !== null && propName in obj && typeof obj[propName as keyof typeof obj] === 'string') {
+        return obj[propName as keyof typeof obj] as string;
+    }
+    return defaultValue;
+}
+
+export function AdminTestingPanel({
+    shouldUseMockTransitData,
+    shouldUseMockWeatherData,
+    shouldUseMockAQIData,
+    onToggleTransitMock,
+    onToggleWeatherMock,
+    onToggleAqiMock,
+}: {
+    shouldUseMockTransitData: boolean;
+    shouldUseMockWeatherData: boolean;
+    shouldUseMockAQIData: boolean;
+    onToggleTransitMock: () => void;
+    onToggleWeatherMock: () => void;
+    onToggleAqiMock: () => void;
+}) {
+    const downloadTransitAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
+    const downloadHighwayAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
+    const [isExpanded, setIsExpanded] = useState<boolean>(() => {
+        return localStorage.getItem(ADMIN_PANEL_STORAGE_KEY) === 'true';
+    });
+    const [results, setResults] = useState<Record<string, EndpointResult>>({
+        test1: { status: 'idle', label: 'Test endpoint' },
+        downloadAlerts: { status: 'idle', label: 'Save transit alerts for future inspection' },
+        downloadHighwayAlerts: { status: 'idle', label: 'Save highway alerts for future inspection' },
+        health: { status: 'idle', label: 'Health check' },
+        wsdotCatalog: { status: 'idle', label: 'WSDOT travel-time catalog' },
+        wsdotHighwayAlerts: { status: 'idle', label: 'WSDOT highway alerts' },
+    });
+    const [downloadTransitAlertsMessage, setDownloadTransitAlertsMessage] = useState('');
+    const [downloadHighwayAlertsMessage, setDownloadHighwayAlertsMessage] = useState('');
+
+    const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    useEffect(() => {
+        localStorage.setItem(ADMIN_PANEL_STORAGE_KEY, String(isExpanded));
+    }, [isExpanded]);
+
+    useEffect(() => {
+        const textarea = downloadTransitAlertsMessageRef.current;
+        if (!textarea) return;
+
+        if (!downloadTransitAlertsMessage.trim()) {
+            textarea.style.height = '';
+            return;
+        }
+
+        textarea.style.height = '0px';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    }, [downloadTransitAlertsMessage]);
+
+    useEffect(() => {
+        const textarea = downloadHighwayAlertsMessageRef.current;
+        if (!textarea) return;
+
+        if (!downloadHighwayAlertsMessage.trim()) {
+            textarea.style.height = '';
+            return;
+        }
+
+        textarea.style.height = '0px';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    }, [downloadHighwayAlertsMessage]);
+
+    const callEndpoint = async (
+        key: string,
+        label: string,
+        path: string,
+        options: EndpointCallOptions = {},
+    ) => {
+        setResults((current) => ({ ...current, [key]: { status: 'loading', label } }));
+
+        try {
+            const response = await fetch(path, {
+                method: options.method ?? 'GET',
+                headers: options.payload ? { 'Content-Type': 'application/json' } : undefined,
+                body: options.payload ? JSON.stringify(options.payload) : undefined,
+            });
+            const contentType = response.headers.get('content-type') ?? '';
+            const body = contentType.includes('application/json') ? await response.json() : await response.text();
+
+            if (!response.ok) {
+                throw new Error(typeof body === 'string' ? body : `HTTP error ${response.status}`);
+            }
+
+            setResults((current) => ({
+                ...current,
+                [key]: { status: 'success', label, body, successText: options.getSuccessText?.(body) },
+            }));
+        } catch (error) {
+            setResults((current) => ({
+                ...current,
+                [key]: { status: 'error', label, error: error instanceof Error ? error.message : String(error) },
+            }));
+        }
+    };
+
+    return (
+        <section className="admin-panel">
+            <button
+                className="admin-panel-toggle"
+                onClick={() => setIsExpanded((expanded) => !expanded)}
+                aria-expanded={isExpanded}
+                aria-controls="admin-panel-body"
+            >
+                <span>Admin / Testing</span>
+                <span className={`admin-panel-chevron ${isExpanded ? 'expanded' : ''}`}>▾</span>
+            </button>
+
+            {isExpanded && (
+                <div className="admin-panel-body" id="admin-panel-body">
+                    <div className="admin-actions">
+                        <div className="admin-action-buttons">
+                            {isLocalHost && (
+                                <button onClick={() => callEndpoint('test1', 'Test endpoint', '/api/test1')}>
+                                    Run `test1`
+                                </button>
+                            )}
+                            <button
+                                onClick={() =>
+                                    callEndpoint('health', 'Health check', '/api/health', {
+                                        getSuccessText: (body) => {
+                                            return getStringPropertyOrDefault(body, 'status', 'Health check succeeded.');
+                                        },
+                                    })
+                                }
+                            >
+                                Run health check
+                            </button>
+                            <button onClick={() => callEndpoint('wsdotCatalog', 'WSDOT travel-time catalog', '/api/wsdot/travel-times/catalog')}>
+                                Run WSDOT catalog
+                            </button>
+                            <button onClick={() => callEndpoint('wsdotHighwayAlerts', 'WSDOT highway alerts', '/api/wsdot/highway-alerts')}>
+                                Run WSDOT highway alerts
+                            </button>
+                        </div>
+                        <div className="admin-action-group">
+                            <label className="admin-input-label" htmlFor="download-transit-alerts-message">
+                                Save transit alerts for future inspection
+                            </label>
+                            <div className="admin-action-input-row">
+                                <div className="admin-textarea-wrap">
+                                    <textarea
+                                        ref={downloadTransitAlertsMessageRef}
+                                        id="download-transit-alerts-message"
+                                        value={downloadTransitAlertsMessage}
+                                        onChange={(event) => setDownloadTransitAlertsMessage(event.target.value)}
+                                        aria-label="Optional note about why these transit alerts matter"
+                                        rows={1}
+                                    />
+                                    {!downloadTransitAlertsMessage && (
+                                        <span className="admin-textarea-placeholder">
+                                            Optional note about why these alerts matter
+                                        </span>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() =>
+                                        callEndpoint(
+                                            'downloadAlerts',
+                                            'Save transit alerts for future inspection',
+                                            '/api/download-alerts',
+                                            {
+                                                method: 'POST',
+                                                payload: { message: downloadTransitAlertsMessage.trim() || undefined },
+                                                getSuccessText: (body) => {
+                                                    return getStringPropertyOrDefault(body, 'message', 'Alerts saved for future inspection.');
+                                                },
+                                            },
+                                        )
+                                    }
+                                >
+                                    Save transit alerts
+                                </button>
+                            </div>
+                        </div>
+                        <div className="admin-action-group">
+                            <label className="admin-input-label" htmlFor="download-highway-alerts-message">
+                                Save highway alerts for future inspection
+                            </label>
+                            <div className="admin-action-input-row">
+                                <div className="admin-textarea-wrap">
+                                    <textarea
+                                        ref={downloadHighwayAlertsMessageRef}
+                                        id="download-highway-alerts-message"
+                                        value={downloadHighwayAlertsMessage}
+                                        onChange={(event) => setDownloadHighwayAlertsMessage(event.target.value)}
+                                        aria-label="Optional note about why these highway alerts matter"
+                                        rows={1}
+                                    />
+                                    {!downloadHighwayAlertsMessage && (
+                                        <span className="admin-textarea-placeholder">
+                                            Optional note about why these alerts matter
+                                        </span>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() =>
+                                        callEndpoint(
+                                            'downloadHighwayAlerts',
+                                            'Save highway alerts for future inspection',
+                                            '/api/wsdot/highway-alerts/log',
+                                            {
+                                                method: 'POST',
+                                                payload: { message: downloadHighwayAlertsMessage.trim() || undefined },
+                                                getSuccessText: (body) => {
+                                                    return getStringPropertyOrDefault(body, 'message', 'Highway alerts saved for future inspection.');
+                                                },
+                                            },
+                                        )
+                                    }
+                                >
+                                    Save highway alerts
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="admin-results">
+                        {Object.entries(results)
+                            .filter(([key]) => isLocalHost || key !== 'test1')
+                            .map(([key, result]) => (
+                                <div className="admin-result-card" key={key}>
+                                    <div className="admin-result-header">
+                                        <h3>{result.label}</h3>
+                                        <span className={`status-pill status-${result.status}`}>{result.status}</span>
+                                    </div>
+                                    {result.status === 'idle' && <p>Run this action to inspect the current response.</p>}
+                                    {result.status === 'loading' && <p>Request in progress...</p>}
+                                    {result.status === 'error' && <p className="admin-error">{result.error}</p>}
+                                    {result.status === 'success' && (
+                                        result.successText ? (
+                                            <p className="admin-success-text">{result.successText}</p>
+                                        ) : (
+                                            <pre>{JSON.stringify(result.body, null, 2)}</pre>
+                                        )
+                                    )}
+                                </div>
+                            ))}
+                    </div>
+
+                    {isLocalHost && (
+                        <div className="admin-mocks">
+                            <div className="admin-mocks-header">
+                                <h3>Local Mock Data</h3>
+                                <p>These toggles are only available on localhost.</p>
+                            </div>
+                            <div className="mock-toggle-row">
+                                <MockDataToggle
+                                    enabled={shouldUseMockTransitData}
+                                    onToggle={onToggleTransitMock}
+                                    label="Mock Transit Data"
+                                />
+                                <MockDataToggle
+                                    enabled={shouldUseMockWeatherData}
+                                    onToggle={onToggleWeatherMock}
+                                    label="Mock Weather Data"
+                                />
+                                <MockDataToggle
+                                    enabled={shouldUseMockAQIData}
+                                    onToggle={onToggleAqiMock}
+                                    label="Mock AQI Data"
+                                />
+                            </div>
+                            <div className="mock-state-summary">
+                                <span>Transit: {shouldUseMockTransitData ? 'mock' : 'live'}</span>
+                                <span>Weather: {shouldUseMockWeatherData ? 'mock' : 'live'}</span>
+                                <span>AQI: {shouldUseMockAQIData ? 'mock' : 'live'}</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+        </section>
+    );
+}
