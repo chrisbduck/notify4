@@ -1,13 +1,19 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { CollapsibleContent, ExpandIndicator } from './CollapsibleContent';
 import { usePolling } from './hooks/usePolling';
 import { getCarCommuteData, type CorridorTravelTime } from './carCommuteService';
 import './CarCommuteDisplay.css';
 
-function getStatus(corridor: CorridorTravelTime): 'normal' | 'slow' | 'heavy' | 'unavailable' {
+type CorridorStatus = 'fast' | 'average' | 'slow' | 'heavy' | 'unavailable';
+
+function getStatus(corridor: CorridorTravelTime): CorridorStatus {
     if (corridor.currentMinutes === null || corridor.averageMinutes === null || corridor.delayMinutes === null) return 'unavailable';
-    if (corridor.delayMinutes <= 2) return 'normal';
-    if (corridor.delayMinutes <= 7) return 'slow';
+    if (corridor.averageMinutes <= 0) return 'unavailable';
+
+    const ratio = corridor.currentMinutes / corridor.averageMinutes;
+    if (ratio <= 0.85) return 'fast';
+    if (ratio <= 1.15) return 'average';
+    if (ratio <= 1.5) return 'slow';
     return 'heavy';
 }
 
@@ -21,31 +27,18 @@ function formatDelay(delayMinutes: number | null) {
     return `(+${delayMinutes})`;
 }
 
-function formatUpdatedAt(updatedAt?: string | null) {
-    if (!updatedAt) return 'Update unavailable';
-    const parsed = new Date(updatedAt);
-    if (Number.isNaN(parsed.getTime())) return 'Update unavailable';
-    return `Updated ${parsed.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
-}
-
-function getWorstStatus(corridors: CorridorTravelTime[]) {
-    const statusRank = { unavailable: 0, normal: 1, slow: 2, heavy: 3 };
-    return corridors.reduce<'normal' | 'slow' | 'heavy' | 'unavailable'>((worst, corridor) => {
-        const current = getStatus(corridor);
-        return statusRank[current] > statusRank[worst] ? current : worst;
-    }, corridors.length ? 'normal' : 'unavailable');
-}
-
-function getSummaryText(status: ReturnType<typeof getWorstStatus>) {
+function formatStatus(status: CorridorStatus) {
     switch (status) {
-        case 'heavy':
-            return 'Heavy traffic on at least one corridor';
+        case 'fast':
+            return 'Fast';
+        case 'average':
+            return 'Average';
         case 'slow':
-            return 'Some slowdown showing';
-        case 'normal':
-            return 'Corridors look typical';
+            return 'Slow';
+        case 'heavy':
+            return 'Very slow';
         default:
-            return 'Travel times unavailable';
+            return 'Unavailable';
     }
 }
 
@@ -65,17 +58,6 @@ export function useCarCommuteData() {
 }
 
 export function CarCommuteCard({ corridors, isLoading, isExpanded, onToggleExpanded }: { corridors: CorridorTravelTime[]; isLoading: boolean; isExpanded: boolean; onToggleExpanded: () => void }) {
-    const worstStatus = useMemo(() => getWorstStatus(corridors), [corridors]);
-    const lastUpdated = useMemo(() => {
-        const updatedTimes = corridors
-            .map((corridor) => corridor.updatedAt)
-            .filter((value): value is string => Boolean(value))
-            .map((value) => new Date(value))
-            .filter((date) => !Number.isNaN(date.getTime()));
-        if (updatedTimes.length === 0) return null;
-        return new Date(Math.max(...updatedTimes.map((date) => date.getTime()))).toISOString();
-    }, [corridors]);
-
     return (
         <button type="button" className="car-commute-card" onClick={onToggleExpanded} aria-expanded={isExpanded} aria-controls="car-commute-expanded-drawer">
             <div className="car-commute-header-row">
@@ -83,9 +65,7 @@ export function CarCommuteCard({ corridors, isLoading, isExpanded, onToggleExpan
                 <ExpandIndicator isExpanded={isExpanded} />
             </div>
 
-            <p className={`car-commute-summary car-commute-summary-${worstStatus}`}>
-                {isLoading ? 'Loading travel times...' : getSummaryText(worstStatus)}
-            </p>
+            {isLoading && <p className="car-commute-summary">Loading travel times...</p>}
 
             <div className="car-commute-list">
                 {(corridors.length ? corridors : ['520', 'I-90', '405', 'I-5'].map((label) => ({ id: null, label, currentMinutes: null, averageMinutes: null, delayMinutes: null, distanceMiles: null }))).map((corridor) => {
@@ -93,14 +73,11 @@ export function CarCommuteCard({ corridors, isLoading, isExpanded, onToggleExpan
                     return (
                         <div className={`car-commute-row car-commute-row-${status}`} key={corridor.label}>
                             <span className="car-commute-label">{corridor.label.replace('SR-', '').replace('I-', '')}</span>
-                            <span className="car-commute-time">{formatMinutes(corridor.currentMinutes)}</span>
-                            <span className="car-commute-delay">{formatDelay(corridor.delayMinutes)}</span>
+                            <span className="car-commute-status-word">{formatStatus(status)}</span>
                         </div>
                     );
                 })}
             </div>
-
-            <p className="car-commute-updated">{formatUpdatedAt(lastUpdated)}</p>
         </button>
     );
 }
@@ -116,9 +93,8 @@ export function CarCommuteDetailsSection({ corridors, isExpanded }: { corridors:
                         <article className={`car-commute-detail-card car-commute-detail-card-${status}`} key={corridor.label}>
                             <div className="car-commute-detail-header">
                                 <h3>{corridor.label}</h3>
-                                <span className={`car-commute-status car-commute-status-${status}`}>{status}</span>
+                                <span className={`car-commute-status car-commute-status-${status}`}>{formatStatus(status)}</span>
                             </div>
-                            <p className="car-commute-route-name">{corridor.name || corridor.description || 'WSDOT route not selected'}</p>
                             <dl className="car-commute-detail-list">
                                 <div>
                                     <dt>Current</dt>
@@ -137,7 +113,6 @@ export function CarCommuteDetailsSection({ corridors, isExpanded }: { corridors:
                                     <dd>{corridor.distanceMiles === null ? '--' : `${Number(corridor.distanceMiles).toFixed(1)} mi`}</dd>
                                 </div>
                             </dl>
-                            <p className="car-commute-detail-updated">{formatUpdatedAt(corridor.updatedAt)}</p>
                         </article>
                     );
                 })}
