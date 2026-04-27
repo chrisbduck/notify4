@@ -13,24 +13,22 @@
 }
 
 .collapsible-content {
-  display: grid;
-  grid-template-rows: 0fr;
+  max-height: 0;
   opacity: 0;
   overflow: hidden;
   pointer-events: none;
   transform: translateY(-8px);
-  transition: grid-template-rows 0.28s ease, opacity 0.22s ease, transform 0.28s ease, margin 0.28s ease;
+  transition: max-height 0.28s ease, opacity 0.22s ease, transform 0.28s ease, margin 0.28s ease;
 }
 
 .collapsible-content.expanded {
-  grid-template-rows: 1fr;
+  max-height: var(--collapsible-height);
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
 }
 
 .collapsible-content-inner {
-  min-height: 0;
   overflow: hidden;
 }
 
