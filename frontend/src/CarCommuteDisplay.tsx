@@ -64,8 +64,8 @@ function formatAlertPriority(priority?: string | null) {
 function getAlertSeverity(alert: CorridorAlert) {
     const category = (alert.category ?? '').toLowerCase();
     const priority = (alert.priority ?? '').toLowerCase();
-    if (priority === 'high' || priority === 'highest' || category.includes('collision') || category.includes('closure')) return 'high';
-    if (priority === 'medium' || category.includes('disabled')) return 'medium';
+    if (priority === 'highest') return 'high';
+    if (priority === 'high' || priority === 'medium' || category.includes('collision') || category.includes('closure') || category.includes('disabled')) return 'medium';
     return 'low';
 }
 
