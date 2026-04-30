@@ -134,6 +134,8 @@ export function AdminTestingPanel({
         const result = results[key];
         if (result.status === 'idle') return null;
 
+        const responseText = result.status === 'success' && !result.successText ? JSON.stringify(result.body, null, 2) : '';
+
         return (
             <div className="admin-result-output">
                 {result.status === 'loading' && <p>Request in progress...</p>}
@@ -142,7 +144,7 @@ export function AdminTestingPanel({
                     result.successText ? (
                         <p className="admin-success-text">{result.successText}</p>
                     ) : (
-                        <pre>{JSON.stringify(result.body, null, 2)}</pre>
+                        <pre className="admin-result-response">{responseText}</pre>
                     )
                 )}
             </div>

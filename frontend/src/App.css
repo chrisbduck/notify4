@@ -207,13 +207,14 @@
   text-transform: capitalize;
 }
 
-.admin-result-output pre {
-  max-height: 260px;
+.admin-result-response {
+  max-height: 200px;
   overflow: auto;
   margin: 0;
   padding: 12px;
+  border: 1px solid rgba(125, 211, 252, 0.12);
   border-radius: 10px;
-  background: #020617;
+  background: rgba(2, 6, 23, 0.92);
   color: #c4f1ff;
   font-size: 0.85rem;
   white-space: pre-wrap;
