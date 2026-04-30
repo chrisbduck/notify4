@@ -125,6 +125,28 @@ export function AdminTestingPanel({
         }
     };
 
+    const renderEndpointResult = (key: string) => {
+        const result = results[key];
+        return (
+            <div className="admin-result-card">
+                <div className="admin-result-header">
+                    <h3>{result.label}</h3>
+                    <span className={`status-pill status-${result.status}`}>{result.status}</span>
+                </div>
+                {result.status === 'idle' && <p>Run this action to inspect the current response.</p>}
+                {result.status === 'loading' && <p>Request in progress...</p>}
+                {result.status === 'error' && <p className="admin-error">{result.error}</p>}
+                {result.status === 'success' && (
+                    result.successText ? (
+                        <p className="admin-success-text">{result.successText}</p>
+                    ) : (
+                        <pre>{JSON.stringify(result.body, null, 2)}</pre>
+                    )
+                )}
+            </div>
+        );
+    };
+
     return (
         <section className="admin-panel">
             <button
@@ -140,133 +162,134 @@ export function AdminTestingPanel({
             {isExpanded && (
                 <div className="admin-panel-body" id="admin-panel-body">
                     <div className="admin-actions">
-                        <div className="admin-action-buttons">
-                            {isLocal && (
-                                <button onClick={() => callEndpoint('test1', 'Test endpoint', '/api/test1')}>
-                                    Run `test1`
-                                </button>
-                            )}
-                            <button
-                                onClick={() =>
-                                    callEndpoint('health', 'Health check', '/api/health', {
-                                        getSuccessText: (body) => {
-                                            return getStringPropertyOrDefault(body, 'status', 'Health check succeeded.');
-                                        },
-                                    })
-                                }
-                            >
-                                Run health check
-                            </button>
-                            <button onClick={() => callEndpoint('wsdotCatalog', 'WSDOT travel-time catalog', '/api/wsdot/travel-times/catalog')}>
-                                Run WSDOT catalog
-                            </button>
-                            <button onClick={() => callEndpoint('wsdotHighwayAlerts', 'WSDOT highway alerts', '/api/wsdot/highway-alerts')}>
-                                Run WSDOT highway alerts
-                            </button>
-                        </div>
-                        <div className="admin-action-group">
-                            <label className="admin-input-label" htmlFor="download-transit-alerts-message">
-                                Save transit alerts for future inspection
-                            </label>
-                            <div className="admin-action-input-row">
-                                <div className="admin-textarea-wrap">
-                                    <textarea
-                                        ref={downloadTransitAlertsMessageRef}
-                                        id="download-transit-alerts-message"
-                                        value={downloadTransitAlertsMessage}
-                                        onChange={(event) => setDownloadTransitAlertsMessage(event.target.value)}
-                                        aria-label="Optional note about why these transit alerts matter"
-                                        rows={1}
-                                    />
-                                    {!downloadTransitAlertsMessage && (
-                                        <span className="admin-textarea-placeholder">
-                                            Optional note about why these alerts matter
-                                        </span>
-                                    )}
+                        {isLocal && (
+                            <div className="admin-action-row">
+                                <div className="admin-action-control">
+                                    <button onClick={() => callEndpoint('test1', 'Test endpoint', '/api/test1')}>
+                                        Run `test1`
+                                    </button>
                                 </div>
+                                {renderEndpointResult('test1')}
+                            </div>
+                        )}
+                        <div className="admin-action-row">
+                            <div className="admin-action-control">
                                 <button
                                     onClick={() =>
-                                        callEndpoint(
-                                            'downloadAlerts',
-                                            'Save transit alerts for future inspection',
-                                            '/api/download-alerts',
-                                            {
-                                                method: 'POST',
-                                                payload: { message: downloadTransitAlertsMessage.trim() || undefined },
-                                                getSuccessText: (body) => {
-                                                    return getStringPropertyOrDefault(body, 'message', 'Alerts saved for future inspection.');
-                                                },
+                                        callEndpoint('health', 'Health check', '/api/health', {
+                                            getSuccessText: (body) => {
+                                                return getStringPropertyOrDefault(body, 'status', 'Health check succeeded.');
                                             },
-                                        )
+                                        })
                                     }
                                 >
-                                    Save transit alerts
+                                    Run health check
                                 </button>
                             </div>
+                            {renderEndpointResult('health')}
                         </div>
-                        <div className="admin-action-group">
-                            <label className="admin-input-label" htmlFor="download-highway-alerts-message">
-                                Save highway alerts for future inspection
-                            </label>
-                            <div className="admin-action-input-row">
-                                <div className="admin-textarea-wrap">
-                                    <textarea
-                                        ref={downloadHighwayAlertsMessageRef}
-                                        id="download-highway-alerts-message"
-                                        value={downloadHighwayAlertsMessage}
-                                        onChange={(event) => setDownloadHighwayAlertsMessage(event.target.value)}
-                                        aria-label="Optional note about why these highway alerts matter"
-                                        rows={1}
-                                    />
-                                    {!downloadHighwayAlertsMessage && (
-                                        <span className="admin-textarea-placeholder">
-                                            Optional note about why these alerts matter
-                                        </span>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={() =>
-                                        callEndpoint(
-                                            'downloadHighwayAlerts',
-                                            'Save highway alerts for future inspection',
-                                            '/api/wsdot/highway-alerts/log',
-                                            {
-                                                method: 'POST',
-                                                payload: { message: downloadHighwayAlertsMessage.trim() || undefined },
-                                                getSuccessText: (body) => {
-                                                    return getStringPropertyOrDefault(body, 'message', 'Highway alerts saved for future inspection.');
-                                                },
-                                            },
-                                        )
-                                    }
-                                >
-                                    Save highway alerts
+                        <div className="admin-action-row">
+                            <div className="admin-action-control">
+                                <button onClick={() => callEndpoint('wsdotCatalog', 'WSDOT travel-time catalog', '/api/wsdot/travel-times/catalog')}>
+                                    Run WSDOT catalog
                                 </button>
                             </div>
+                            {renderEndpointResult('wsdotCatalog')}
                         </div>
-                    </div>
-
-                    <div className="admin-results">
-                        {Object.entries(results)
-                            .filter(([key]) => isLocal || key !== 'test1')
-                            .map(([key, result]) => (
-                                <div className="admin-result-card" key={key}>
-                                    <div className="admin-result-header">
-                                        <h3>{result.label}</h3>
-                                        <span className={`status-pill status-${result.status}`}>{result.status}</span>
+                        <div className="admin-action-row">
+                            <div className="admin-action-control">
+                                <button onClick={() => callEndpoint('wsdotHighwayAlerts', 'WSDOT highway alerts', '/api/wsdot/highway-alerts')}>
+                                    Run WSDOT highway alerts
+                                </button>
+                            </div>
+                            {renderEndpointResult('wsdotHighwayAlerts')}
+                        </div>
+                        <div className="admin-action-row">
+                            <div className="admin-action-control">
+                                <label className="admin-input-label" htmlFor="download-transit-alerts-message">
+                                    Save transit alerts for future inspection
+                                </label>
+                                <div className="admin-action-input-row">
+                                    <div className="admin-textarea-wrap">
+                                        <textarea
+                                            ref={downloadTransitAlertsMessageRef}
+                                            id="download-transit-alerts-message"
+                                            value={downloadTransitAlertsMessage}
+                                            onChange={(event) => setDownloadTransitAlertsMessage(event.target.value)}
+                                            aria-label="Optional note about why these transit alerts matter"
+                                            rows={1}
+                                        />
+                                        {!downloadTransitAlertsMessage && (
+                                            <span className="admin-textarea-placeholder">
+                                                Optional note about why these alerts matter
+                                            </span>
+                                        )}
                                     </div>
-                                    {result.status === 'idle' && <p>Run this action to inspect the current response.</p>}
-                                    {result.status === 'loading' && <p>Request in progress...</p>}
-                                    {result.status === 'error' && <p className="admin-error">{result.error}</p>}
-                                    {result.status === 'success' && (
-                                        result.successText ? (
-                                            <p className="admin-success-text">{result.successText}</p>
-                                        ) : (
-                                            <pre>{JSON.stringify(result.body, null, 2)}</pre>
-                                        )
-                                    )}
+                                    <button
+                                        onClick={() =>
+                                            callEndpoint(
+                                                'downloadAlerts',
+                                                'Save transit alerts for future inspection',
+                                                '/api/download-alerts',
+                                                {
+                                                    method: 'POST',
+                                                    payload: { message: downloadTransitAlertsMessage.trim() || undefined },
+                                                    getSuccessText: (body) => {
+                                                        return getStringPropertyOrDefault(body, 'message', 'Alerts saved for future inspection.');
+                                                    },
+                                                },
+                                            )
+                                        }
+                                    >
+                                        Save transit alerts
+                                    </button>
                                 </div>
-                            ))}
+                            </div>
+                            {renderEndpointResult('downloadAlerts')}
+                        </div>
+                        <div className="admin-action-row">
+                            <div className="admin-action-control">
+                                <label className="admin-input-label" htmlFor="download-highway-alerts-message">
+                                    Save highway alerts for future inspection
+                                </label>
+                                <div className="admin-action-input-row">
+                                    <div className="admin-textarea-wrap">
+                                        <textarea
+                                            ref={downloadHighwayAlertsMessageRef}
+                                            id="download-highway-alerts-message"
+                                            value={downloadHighwayAlertsMessage}
+                                            onChange={(event) => setDownloadHighwayAlertsMessage(event.target.value)}
+                                            aria-label="Optional note about why these highway alerts matter"
+                                            rows={1}
+                                        />
+                                        {!downloadHighwayAlertsMessage && (
+                                            <span className="admin-textarea-placeholder">
+                                                Optional note about why these alerts matter
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() =>
+                                            callEndpoint(
+                                                'downloadHighwayAlerts',
+                                                'Save highway alerts for future inspection',
+                                                '/api/wsdot/highway-alerts/log',
+                                                {
+                                                    method: 'POST',
+                                                    payload: { message: downloadHighwayAlertsMessage.trim() || undefined },
+                                                    getSuccessText: (body) => {
+                                                        return getStringPropertyOrDefault(body, 'message', 'Highway alerts saved for future inspection.');
+                                                    },
+                                                },
+                                            )
+                                        }
+                                    >
+                                        Save highway alerts
+                                    </button>
+                                </div>
+                            </div>
+                            {renderEndpointResult('downloadHighwayAlerts')}
+                        </div>
                     </div>
 
                     {isLocal && (
