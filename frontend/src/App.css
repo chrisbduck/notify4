@@ -49,7 +49,7 @@
   line-height: 1.2;
 }
 
-.admin-panel {
+.app-panel {
   margin-bottom: 28px;
   border: 1px solid #22415d;
   border-radius: 18px;
@@ -58,7 +58,7 @@
   overflow: hidden;
 }
 
-.admin-panel-toggle {
+.app-panel-toggle {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -70,30 +70,49 @@
   font-size: 1rem;
 }
 
-.admin-panel-toggle:hover {
+.app-panel-toggle:hover {
   border-color: transparent;
   background: rgba(125, 211, 252, 0.06);
 }
 
-.admin-panel-toggle:focus,
-.admin-panel-toggle:focus-visible {
+.app-panel-toggle:focus,
+.app-panel-toggle:focus-visible {
   outline: none;
 }
 
-.admin-panel-toggle:focus-visible {
+.app-panel-toggle:focus-visible {
   box-shadow: inset 0 0 0 2px rgba(125, 211, 252, 0.35);
 }
 
-.admin-panel-body {
+.app-panel-body {
   padding: 0 22px 22px;
 }
 
-.admin-panel-chevron {
+.app-panel-chevron {
   transition: transform 0.2s ease;
 }
 
-.admin-panel-chevron.expanded {
+.app-panel-chevron.expanded {
   transform: rotate(180deg);
+}
+
+.settings-panel-content {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.settings-toggle-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: #7dd3fc;
 }
 
 .admin-actions {

@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { isLocalHost } from './localEnvironment';
 import { MockDataToggle } from './MockDataToggle';
+import { PersistedPanel } from './PersistedPanel';
 
 interface EndpointResult {
     status: 'idle' | 'loading' | 'success' | 'error';
@@ -46,9 +47,6 @@ export function AdminTestingPanel({
 }) {
     const downloadTransitAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
     const downloadHighwayAlertsMessageRef = useRef<HTMLTextAreaElement | null>(null);
-    const [isExpanded, setIsExpanded] = useState<boolean>(() => {
-        return localStorage.getItem(ADMIN_PANEL_STORAGE_KEY) === 'true';
-    });
     const [results, setResults] = useState<Record<string, EndpointResult>>({
         test1: { status: 'idle', label: 'Test endpoint' },
         downloadAlerts: { status: 'idle', label: 'Save transit alerts for future inspection' },
@@ -61,10 +59,6 @@ export function AdminTestingPanel({
     const [downloadHighwayAlertsMessage, setDownloadHighwayAlertsMessage] = useState('');
 
     const isLocal = isLocalHost();
-
-    useEffect(() => {
-        localStorage.setItem(ADMIN_PANEL_STORAGE_KEY, String(isExpanded));
-    }, [isExpanded]);
 
     useEffect(() => {
         const textarea = downloadTransitAlertsMessageRef.current;
@@ -165,19 +159,7 @@ export function AdminTestingPanel({
     };
 
     return (
-        <section className="admin-panel">
-            <button
-                className="admin-panel-toggle"
-                onClick={() => setIsExpanded((expanded) => !expanded)}
-                aria-expanded={isExpanded}
-                aria-controls="admin-panel-body"
-            >
-                <span>Admin / Testing</span>
-                <span className={`admin-panel-chevron ${isExpanded ? 'expanded' : ''}`}>▾</span>
-            </button>
-
-            {isExpanded && (
-                <div className="admin-panel-body" id="admin-panel-body">
+        <PersistedPanel title="Admin / Testing" storageKey={ADMIN_PANEL_STORAGE_KEY}>
                     <div className="admin-actions">
                         {isLocal && (
                             renderActionCard(
@@ -339,8 +321,6 @@ export function AdminTestingPanel({
                             </div>
                         </div>
                     )}
-                </div>
-            )}
-        </section>
+        </PersistedPanel>
     );
 }

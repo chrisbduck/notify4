@@ -138,7 +138,7 @@ function mergeAlertsIntoCorridors(corridors: CorridorTravelTime[], alerts: Corri
     }));
 }
 
-export async function getCarCommuteData(useMockData: boolean): Promise<CorridorTravelTime[]> {
+export async function getCarCommuteData(useMockData: boolean, includeLowerPriorityAlerts: boolean): Promise<CorridorTravelTime[]> {
     if (useMockData) {
         return MOCK_CORRIDORS;
     }
@@ -153,7 +153,8 @@ export async function getCarCommuteData(useMockData: boolean): Promise<CorridorT
         const corridors = withEmptyAlerts(body.corridors);
 
         try {
-            const alertsResponse = await apiFetch('/wsdot/highway-alerts');
+            const alertsPath = '/wsdot/highway-alerts' + (includeLowerPriorityAlerts ? '?includeLowerPriority=true' : '');
+            const alertsResponse = await apiFetch(alertsPath);
             if (!alertsResponse.ok) {
                 throw new Error(`HTTP error ${alertsResponse.status}`);
             }

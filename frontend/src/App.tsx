@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import './App.css';
 import { AdminTestingPanel } from './AdminTestingPanel';
+import { SettingsPanel } from './SettingsPanel';
 import WeatherCardDisplay from './WeatherCardDisplay';
 import AlertSummaryCard from './AlertSummaryCard';
 import AqiDisplay from './AqiDisplay';
@@ -12,6 +13,7 @@ import { TransitAlertsSection } from './TransitAlertsSection';
 import { getSeattleWeather, isBefore2PM, type WeatherData } from './weatherService';
 import { WeatherDetailsSection } from './WeatherDetailsSection';
 import { useShouldUseMockAQIData, useShouldUseMockCarCommuteData, useShouldUseMockTransitData, useShouldUseMockWeatherData } from './mockData';
+import { useShouldShowLowerPriorityDriveAlerts } from './settings';
 
 function App() {
     const [alerts, setAlerts] = useState<AlertModel[]>([]);
@@ -22,10 +24,11 @@ function App() {
     const [shouldUseMockWeatherData, setShouldUseMockWeatherData] = useShouldUseMockWeatherData();
     const [shouldUseMockAQIData, setShouldUseMockAQIData] = useShouldUseMockAQIData();
     const [shouldUseMockCarCommuteData, setShouldUseMockCarCommuteData] = useShouldUseMockCarCommuteData();
+    const [showLowerPriorityDriveAlerts, setShowLowerPriorityDriveAlerts] = useShouldShowLowerPriorityDriveAlerts();
     const [isWeatherDetailsExpanded, setIsWeatherDetailsExpanded] = useState(false);
     const [isAqiDetailsExpanded, setIsAqiDetailsExpanded] = useState(false);
     const [isCarCommuteDetailsExpanded, setIsCarCommuteDetailsExpanded] = useState(false);
-    const { corridors: carCommuteCorridors, isLoading: isCarCommuteLoading, error: carCommuteError } = usePolledCarCommuteData(shouldUseMockCarCommuteData);
+    const { corridors: carCommuteCorridors, isLoading: isCarCommuteLoading, error: carCommuteError } = usePolledCarCommuteData(shouldUseMockCarCommuteData, showLowerPriorityDriveAlerts);
 
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
     const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -90,6 +93,11 @@ function App() {
                 <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} />
                 <TransitAlertsSection loading={loading} alerts={alerts} />
             </main>
+
+            <SettingsPanel
+                showLowerPriorityDriveAlerts={showLowerPriorityDriveAlerts}
+                onToggleShowLowerPriorityDriveAlerts={() => setShowLowerPriorityDriveAlerts((value) => !value)}
+            />
 
             <AdminTestingPanel
                 shouldUseMockTransitData={shouldUseMockTransitData}

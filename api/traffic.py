@@ -205,10 +205,11 @@ def alert_matches_corridor(alert, config):
 
 def is_relevant_alert(alert):
     category = str(alert.get("EventCategory") or "").lower()
-    priority_rank = PRIORITY_RANK.get(str(alert.get("Priority") or "").strip().lower(), 4)
-    if "maintenance" in category and priority_rank >= PRIORITY_RANK["medium"]:
-        return False
     return any(relevant in category for relevant in RELEVANT_ALERT_CATEGORIES)
+
+
+def is_high_priority_alert(alert):
+    return PRIORITY_RANK.get(str(alert.get("Priority") or "").strip().lower(), 4) <= PRIORITY_RANK["high"]
 
 
 def get_alert_corridor_label(alert):
@@ -233,11 +234,13 @@ def normalize_wsdot_alert(alert, corridor_label: str):
     }
 
 
-def select_corridor_alerts(alerts):
+def select_corridor_alerts(alerts, include_lower_priority: bool = False):
     selected = []
     for alert in alerts:
         corridor_label = get_alert_corridor_label(alert)
         if not corridor_label or not is_relevant_alert(alert):
+            continue
+        if not include_lower_priority and not is_high_priority_alert(alert):
             continue
         selected.append(normalize_wsdot_alert(alert, corridor_label))
 
@@ -290,13 +293,15 @@ def wsdot_highway_alerts():
         return create_json_error("Server is not configured with WSDOT_ACCESS_CODE", 500)
 
     try:
+        include_lower_priority = request.args.get("includeLowerPriority", "").strip().lower() == "true"
         alerts = fetch_wsdot_highway_alerts(access_code)
         if not isinstance(alerts, list):
             return create_json_error("Unexpected WSDOT highway-alerts response", 502)
 
         return jsonify({
-            "alerts": select_corridor_alerts(alerts),
+            "alerts": select_corridor_alerts(alerts, include_lower_priority),
             "fetched_at": int(time.time()),
+            "include_lower_priority": include_lower_priority,
         })
     except RuntimeError as exc:
         return create_json_error(str(exc), 502)

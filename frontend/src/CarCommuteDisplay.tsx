@@ -93,11 +93,11 @@ export function useCarCommuteData() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchCommuteData = useCallback(async (useMockData: boolean) => {
+    const fetchCommuteData = useCallback(async (useMockData: boolean, includeLowerPriorityAlerts: boolean) => {
         setIsLoading(true);
         setError(null);
         try {
-            setCorridors(await getCarCommuteData(useMockData));
+            setCorridors(await getCarCommuteData(useMockData, includeLowerPriorityAlerts));
         } catch (fetchError) {
             setCorridors([]);
             setError('Drive data unavailable.');
@@ -108,11 +108,11 @@ export function useCarCommuteData() {
     return { corridors, isLoading, error, fetchCommuteData };
 }
 
-export function usePolledCarCommuteData(useMockData: boolean) {
+export function usePolledCarCommuteData(useMockData: boolean, includeLowerPriorityAlerts: boolean) {
     const { corridors, isLoading, error, fetchCommuteData } = useCarCommuteData();
-    const pollingFunction = useCallback(() => fetchCommuteData(useMockData), [fetchCommuteData, useMockData]);
+    const pollingFunction = useCallback(() => fetchCommuteData(useMockData, includeLowerPriorityAlerts), [fetchCommuteData, includeLowerPriorityAlerts, useMockData]);
 
-    usePolling(pollingFunction, 300000, `car-commute:${useMockData ? 'mock' : 'live'}`);
+    usePolling(pollingFunction, 300000, `car-commute:${useMockData ? 'mock' : 'live'}:${includeLowerPriorityAlerts ? 'all-alerts' : 'high-alerts'}`);
 
     return { corridors, isLoading, error };
 }
