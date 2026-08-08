@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { getAqiDataForLocation, type AqiData } from './aqiService';
+import { findClosestStation, getCurrentDeviceLocation, type Coordinates } from './aqiLocation';
 import { usePolling } from './hooks/usePolling';
 import { CollapsibleContent, ExpandIndicator } from './CollapsibleContent';
 import './AqiDisplay.css';
@@ -61,6 +62,8 @@ interface LocationEntry {
     id: string;
     fullName: string;
     shortName: string;
+    latitude: number;
+    longitude: number;
     data: AqiData | null;
 }
 
@@ -68,10 +71,13 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData, isExpanded, onToggleE
     const [nkAqi, setNkAqi] = useState<AqiData | null>(null);
     const [sdAqi, setSdAqi] = useState<AqiData | null>(null);
     const [mtAqi, setMtAqi] = useState<AqiData | null>(null);
+    const [deviceLocation, setDeviceLocation] = useState<Coordinates | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchAqiData = useCallback(async () => {
         setIsLoading(true);
+        setDeviceLocation(null);
+        const deviceLocationPromise = getCurrentDeviceLocation();
         const [nkData, sdData, mtData] = await Promise.all([
             getAqiDataForLocation('north-kirkland', mockData),
             getAqiDataForLocation('seattle-downtown', mockData),
@@ -81,15 +87,16 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData, isExpanded, onToggleE
         setSdAqi(sdData);
         setMtAqi(mtData);
         setIsLoading(false);
+        setDeviceLocation(await deviceLocationPromise);
     }, [mockData]);
 
     usePolling(fetchAqiData, 300000, `aqi-display:${mockData ? 'mock' : 'live'}`);
 
     const locations = useMemo<LocationEntry[]>(
         () => [
-            { id: 'north-kirkland', fullName: 'North Kirkland', shortName: 'Kirkland', data: nkAqi },
-            { id: 'seattle-downtown', fullName: 'Seattle Downtown', shortName: 'Seattle', data: sdAqi },
-            { id: 'mountlake-terrace', fullName: 'Mountlake Terrace', shortName: 'Mountlake', data: mtAqi },
+            { id: 'north-kirkland', fullName: 'North Kirkland', shortName: 'Kirkland', latitude: 47.71437, longitude: -122.19851, data: nkAqi },
+            { id: 'seattle-downtown', fullName: 'Seattle Downtown', shortName: 'Seattle', latitude: 47.60481, longitude: -122.34049, data: sdAqi },
+            { id: 'mountlake-terrace', fullName: 'Mountlake Terrace', shortName: 'Mountlake', latitude: 47.79584, longitude: -122.293365, data: mtAqi },
         ],
         [nkAqi, sdAqi, mtAqi],
     );
@@ -100,12 +107,16 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData, isExpanded, onToggleE
     const averageAqi = allAqiValues.length > 0
         ? allAqiValues.reduce((sum, aqi) => sum + aqi, 0) / allAqiValues.length
         : null;
+    const closestLocation = deviceLocation ? findClosestStation(deviceLocation, populatedLocations) : null;
+    const summaryAqi = closestLocation?.data?.aqi ?? averageAqi;
 
     const allCategoriesMatch = categories.length > 0 && categories.every((category) => category === categories[0]);
-    const summaryCategory = averageAqi === null
+    const summaryCategory = summaryAqi === null
         ? (isLoading ? 'Loading' : 'Not Available')
+        : closestLocation?.data
+            ? closestLocation.data.category
         : allCategoriesMatch
-            ? getAqiCategory(averageAqi)
+            ? getAqiCategory(summaryAqi)
             : getWorstCategory(categories);
 
     const summaryLocationLine = locations
@@ -132,10 +143,10 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ mockData, isExpanded, onToggleE
                     <div className="aqi-main-content">
                         {isLoading ? (
                             <p className="aqi-summary-loading">Loading AQI data...</p>
-                        ) : averageAqi !== null ? (
+                        ) : summaryAqi !== null ? (
                             <>
                                 <div className={`aqi-circle aqi-circle-${summaryCategory.toLowerCase().replace(/\s/g, '-')}`}></div>
-                                <p className="aqi-value">{averageAqi.toFixed(1)}</p>
+                                <p className="aqi-value">{summaryAqi.toFixed(1)}</p>
                                 <p className="aqi-category aqi-category-summary">{summaryCategory}</p>
                                 <p className="aqi-summary-line">{summaryLocationLine}</p>
                                 <p className="aqi-summary-line aqi-range-line">{summaryRangeLine}</p>
