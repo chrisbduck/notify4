@@ -202,6 +202,19 @@ curl http://localhost:3000/api/health
 - Delete `node_modules` and `package-lock.json`, then run `npm install` again
 - For Python, use a virtual environment: `python -m venv .venv`
 
+## I-405 commute tolls
+
+`GET /api/wsdot/tolls` uses the existing `WSDOT_ACCESS_CODE`. The frontend polls separately every minute; toll failures do not affect corridor health. On weekends and overnight (8 p.m. to 5 a.m. Pacific), the display uses the published free-hours schedule even when the feed is stale or missing. Fresh restrictions override that schedule. During tolling hours, prices older than five minutes are hidden with a small awaiting-update note. Morning is before noon in America/Los_Angeles, including DST.
+
+Trip mapping verified against WSDOT's `GetTollRatesAsJson` catalog on 2026-09-20:
+
+- Northbound: `405tp01352`, Bellevue mainline / NE 4th to the SR 522 destination zone, covering NE 128th and NE 160th beyond NE 124th. NE 6th direct access is a different entry.
+- Southbound: `405tp02162`, NE 145th toll board after entry from NE 160th, to NE 6th / Bellevue.
+
+Prices and operational messages come from `GetTollTripRatesAsJson` (`Toll` is **dollars**). The older catalog's `CurrentToll` uses cents and is not used for price conversion. Route assumptions are visible in the expanded Drive section. Source: https://wsdot.wa.gov/traffic/api/TollRates/TollRatesREST.svc/Help and WSDOT's I-405 express toll lane zone rules.
+
+Verify with `python -m unittest api.test_tolls`, `npm --prefix frontend test`, and `npm run build`. The existing local Mock Drive Data toggle also supplies clearly labeled demo toll prices.
+
 ## License
 
 MIT

@@ -28,7 +28,7 @@ function App() {
     const [isWeatherDetailsExpanded, setIsWeatherDetailsExpanded] = useState(false);
     const [isAqiDetailsExpanded, setIsAqiDetailsExpanded] = useState(false);
     const [isCarCommuteDetailsExpanded, setIsCarCommuteDetailsExpanded] = useState(false);
-    const { corridors: carCommuteCorridors, isLoading: isCarCommuteLoading, error: carCommuteError } = usePolledCarCommuteData(shouldUseMockCarCommuteData, showLowerPriorityDriveAlerts);
+    const { corridors: carCommuteCorridors, isLoading: isCarCommuteLoading, error: carCommuteError, tolls, tollsLoading, now: commuteNow } = usePolledCarCommuteData(shouldUseMockCarCommuteData, showLowerPriorityDriveAlerts);
 
     const [seattleWeather, setSeattleWeather] = useState<WeatherData | null>(null);
     const [seattleWeather4pm, setSeattleWeather4pm] = useState<WeatherData | null>(null);
@@ -82,14 +82,14 @@ function App() {
 
             <section className="main-content-cards">
                 <AlertSummaryCard loading={loading} alerts={alerts} />
-                <CarCommuteCard corridors={carCommuteCorridors} isLoading={isCarCommuteLoading} error={carCommuteError} isExpanded={isCarCommuteDetailsExpanded} onToggleExpanded={() => setIsCarCommuteDetailsExpanded((expanded) => !expanded)} />
+                <CarCommuteCard tolls={tolls} tollsLoading={tollsLoading} now={commuteNow} isMock={shouldUseMockCarCommuteData} corridors={carCommuteCorridors} isLoading={isCarCommuteLoading} error={carCommuteError} isExpanded={isCarCommuteDetailsExpanded} onToggleExpanded={() => setIsCarCommuteDetailsExpanded((expanded) => !expanded)} />
                 <WeatherCardDisplay currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} onToggleExpanded={() => setIsWeatherDetailsExpanded((expanded) => !expanded)} />
                 <AqiDisplay mockData={shouldUseMockAQIData} isExpanded={isAqiDetailsExpanded} onToggleExpanded={() => setIsAqiDetailsExpanded((expanded) => !expanded)} />
             </section>
 
             <main className="dashboard-sections">
                 {error && <p className="page-error">{error}</p>}
-                <CarCommuteDetailsSection corridors={carCommuteCorridors} isExpanded={isCarCommuteDetailsExpanded} />
+                <CarCommuteDetailsSection tolls={tolls} now={commuteNow} isMock={shouldUseMockCarCommuteData} corridors={carCommuteCorridors} isExpanded={isCarCommuteDetailsExpanded} />
                 <WeatherDetailsSection currentWeather={seattleWeather} forecast4pm={seattleWeather4pm} isExpanded={isWeatherDetailsExpanded} />
                 <TransitAlertsSection loading={loading} alerts={alerts} />
             </main>

@@ -8,6 +8,10 @@
   color: #e0e0e0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  font: inherit;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
@@ -29,14 +33,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 0;
+  width: 100%;
   margin-bottom: 12px;
 }
 
 .car-commute-header-row h3 {
   margin: 0;
   color: #e0e0e0;
-  font-size: 1.25rem;
+  font-size: 1.17em;
+  flex: 1;
+  margin-left: 24px;
+  text-align: center;
 }
 
 .car-commute-summary {
@@ -304,11 +312,13 @@
   .car-commute-card {
     width: 100%;
     min-height: 0;
-    padding: 14px;
+    padding: 12px 10px;
   }
 
   .car-commute-header-row h3 {
-    font-size: 1.08rem;
+    font-size: 0.95rem;
+    line-height: 1.15;
+    margin-left: 18px;
   }
 
   .car-commute-summary {
@@ -341,4 +351,30 @@
     width: 14px;
     height: 14px;
   }
+}
+
+/* Keep tolls inside the existing card footprint, including loading/error states. */
+.commute-toll { display: grid; flex: 1; align-content: center; gap: 5px; width: 100%; text-align: center; margin: 0 0 12px; }
+.commute-toll-heading { color: #7dd3fc; font-size: 0.76rem; }
+.commute-toll-price { color: #f8fafc; font-size: 1.65rem; line-height: 1.25; font-weight: 600; }
+.commute-toll-route { color: #bfd3ea; font-size: 0.68rem; white-space: nowrap; }
+.commute-toll-note { color: #a8b6c8; font-size: 0.66rem; line-height: 1.25; }
+.car-commute-primary { width: 100%; margin-top: auto; }
+.car-commute-primary .car-commute-row { padding: 6px; }
+.car-commute-secondary { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 8px; }
+.car-commute-secondary .car-commute-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; padding: 5px 1px; min-width: 0; }
+.car-commute-secondary .car-commute-label { font-size: 0.68rem; }
+.car-commute-secondary .car-commute-status-word { order: 3; flex-basis: 100%; text-align: center; font-size: 0.6rem; white-space: nowrap; }
+.car-commute-secondary .car-commute-alert-icon { width: 10px; height: 10px; }
+.commute-toll-details { margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #555; }
+.commute-toll-details h3 { margin: 0 0 12px; font-size: 1rem; }
+.commute-toll-details p { color: #bfd3ea; font-size: 0.84rem; line-height: 1.5; }
+.commute-toll-directions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.commute-toll-directions > div { display: grid; gap: 4px; padding: 12px; border: 1px solid #555; border-radius: 8px; }
+.commute-toll-directions strong { color: #f8fafc; font-size: 1.4rem; }
+.commute-toll-directions span, .commute-toll-directions small { color: #bfd3ea; font-size: 0.8rem; }
+@media (max-width: 480px) {
+  .car-commute-card { padding: 12px 10px; }
+  .car-commute-header-row { margin-bottom: 8px; }
+  .commute-toll-price { font-size: 1.6rem; }
 }

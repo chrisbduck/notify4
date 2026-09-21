@@ -12,8 +12,10 @@ import requests
 
 try:
     from traffic import traffic_bp
+    from tolls import tolls_bp
 except ImportError:
     from .traffic import traffic_bp
+    from .tolls import tolls_bp
 
 def _configure_environment():
     project_root = Path(__file__).resolve().parent.parent
@@ -26,6 +28,7 @@ _configure_environment()
 app = Flask(__name__)
 CORS(app)
 app.register_blueprint(traffic_bp)
+app.register_blueprint(tolls_bp)
 
 SENSOR_NAMES: Dict[str, int] = {
     "finn-hill": 156415,
