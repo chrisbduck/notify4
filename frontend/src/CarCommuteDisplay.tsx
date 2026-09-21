@@ -3,7 +3,7 @@ import { FaCheckCircle, FaExclamationTriangle, FaInfoCircle } from 'react-icons/
 import { TbAlertOctagonFilled } from 'react-icons/tb';
 import { CollapsibleContent, ExpandIndicator } from './CollapsibleContent';
 import { usePolling } from './hooks/usePolling';
-import { getCarCommuteData, type CorridorAlert, type CorridorTravelTime } from './carCommuteService';
+import { getAlertSeverity, getCarCommuteData, type CorridorAlert, type CorridorTravelTime } from './carCommuteService';
 import './CarCommuteDisplay.css';
 import { getCommuteTolls, getTollDirection, getTollDisplay, getTollNote, TOLL_ROUTES, type CommuteTolls } from './tollService';
 
@@ -49,19 +49,6 @@ function formatCardLabel(label: string) {
     if (label === 'I-405') return '405';
     if (label === 'I-5 Downtown') return 'I-5';
     return label;
-}
-
-function formatAlertPriority(priority?: string | null) {
-    if (!priority) return 'Unknown';
-    return priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
-}
-
-function getAlertSeverity(alert: CorridorAlert) {
-    const category = (alert.category ?? '').toLowerCase();
-    const priority = (alert.priority ?? '').toLowerCase();
-    if (priority === 'highest') return 'high';
-    if (priority === 'high' || priority === 'medium' || category.includes('collision') || category.includes('closure') || category.includes('disabled')) return 'medium';
-    return 'low';
 }
 
 function getWorstAlertSeverity(alerts: CorridorAlert[]) {
@@ -227,7 +214,7 @@ export function CarCommuteDetailsSection({ corridors, isExpanded, tolls, now, is
                                                 <article className={`car-commute-alert car-commute-alert-${severity}`} key={alert.id ?? `${alert.category}-${alert.headline}`}>
                                                     <div className="car-commute-alert-meta">
                                                         <span>{alert.category || 'Alert'}</span>
-                                                        <span>{formatAlertPriority(alert.priority)}</span>
+                                                        <span>{severity === 'high' ? 'High' : severity === 'medium' ? 'Warning' : 'Info'}</span>
                                                     </div>
                                                     <p>{alert.headline || 'No headline available'}</p>
                                                 </article>

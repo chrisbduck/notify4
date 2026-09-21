@@ -172,16 +172,24 @@
   }
 
   .weather-alert-banner,
-  .weather-card > .weather-supporting-text,
-  .weather-details-column:not(.weather-details-column-current),
-  .weather-details-column h4 {
+  .weather-card > .weather-supporting-text {
     display: none;
   }
 
   .weather-details-container {
     margin-bottom: 0;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: space-evenly;
+    gap: 8px;
+  }
+
+  .weather-details-column {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .weather-details-column h4 {
+    font-size: 0.82rem;
   }
 
   .weather-details {

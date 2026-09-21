@@ -22,6 +22,19 @@ export interface CorridorAlert {
     end?: RoadwayLocation | null;
 }
 
+export function getAlertSeverity(alert: CorridorAlert): 'high' | 'medium' | 'low' {
+    const category = (alert.category ?? '').trim().toLowerCase();
+    const priority = (alert.priority ?? '').trim().toLowerCase();
+    const isRoadwork = /construction|road\s*work|maintenance/.test(category);
+    const text = `${alert.headline ?? ''} ${alert.description ?? ''}`.toLowerCase();
+    // Ramp and individual lane closures during roadwork are warnings. Keep explicit mainline closures severe.
+    const isMainlineClosure = text.split(/[.!?;\n]/).some((clause) => !/\bramps?\b/.test(clause)
+        && /\b(?:all (?:(?:northbound|southbound|eastbound|westbound|mainline|through) )?lanes|mainline|highway|freeway|roadway) (?:is |are |will be )?(?:fully |completely )?(?:closed|blocked)\b/.test(clause));
+    if (priority === 'highest' && (!isRoadwork || isMainlineClosure)) return 'high';
+    if (['highest', 'high', 'medium'].includes(priority) || /collision|closure|disabled/.test(category)) return 'medium';
+    return 'low';
+}
+
 export interface CorridorTravelTime {
     id: number | null;
     label: string;
