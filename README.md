@@ -211,7 +211,7 @@ Trip mapping verified against WSDOT's `GetTollRatesAsJson` catalog on 2026-09-20
 - Northbound: `405tp01352`, Bellevue mainline / NE 4th to the SR 522 destination zone, covering NE 128th and NE 160th beyond NE 124th. NE 6th direct access is a different entry.
 - Southbound: `405tp02162`, NE 145th toll board after entry from NE 160th, to NE 6th / Bellevue.
 
-Prices and operational messages come from `GetTollTripRatesAsJson` (`Toll` is **dollars**). The older catalog's `CurrentToll` uses cents and is not used for price conversion. Route assumptions are visible in the expanded Drive section. Source: https://wsdot.wa.gov/traffic/api/TollRates/TollRatesREST.svc/Help and WSDOT's I-405 express toll lane zone rules.
+Prices and operational messages come from `GetTollRatesAsJson`: `CurrentToll` is converted from cents to dollars, `CurrentMessage` carries restrictions, and `TimeUpdated` determines freshness. The trip-message endpoint (`GetTollTripRatesAsJson`) was observed lagging more than seven minutes behind this feed on 2026-09-25, causing the five-minute freshness cutoff to hide valid prices. Responses are not cached. Route assumptions are visible in the expanded Drive section. Source: https://wsdot.wa.gov/traffic/api/Documentation/class_toll_rate.html and WSDOT's I-405 express toll lane zone rules.
 
 Verify with `python -m unittest api.test_tolls`, `npm --prefix frontend test`, and `npm run build`. The existing local Mock Drive Data toggle also supplies clearly labeled demo toll prices.
 
