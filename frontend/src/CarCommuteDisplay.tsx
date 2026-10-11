@@ -169,9 +169,7 @@ export function CarCommuteDetailsSection({ corridors, isExpanded, tolls, now, is
                         </div>
                     ))}
                 </div>
-                <p>Current Good To Go! pass prices, refreshed every minute. Weekends and nights (8 p.m.–5 a.m. Pacific) show Free using the published schedule, even if the feed is delayed. During tolling hours, rates over five minutes old are hidden until refreshed. The card switches from southbound to northbound at noon Pacific. These are current rates, not a forecast; the entry sign determines your toll.</p>
                 <p>Northbound assumes the Bellevue mainline entry near NE 4th St and uses the SR 522 destination zone for NE 128th / NE 160th St, beyond the NE 124th zone. Southbound assumes entry from NE 160th St, using the NE 145th toll board to Bellevue / NE 6th St. The NE 6th direct-access entry may have a different rate.</p>
-                <p>Fresh closed and HOV-only messages override the free-hours schedule. Eligible carpools need a Flex Pass in HOV mode during tolling hours. <a href="https://wsdot.wa.gov/travel/roads-bridges/toll-roads-bridges-tunnels/i-405-express-toll-lanes" target="_blank" rel="noreferrer">WSDOT toll and access rules</a></p>
             </section>
             <div className="car-commute-detail-grid">
                 {corridors.map((corridor) => {

@@ -2,6 +2,7 @@
 
 ## Environment-specific guidance
 
+- When developing in a cloud environment, always commit and push any changes and create a pull request before finishing the task. Include the pull request link in the final response.
 - `rg` may not be runnable in this workspace on Windows/Codex Desktop. In this repo it failed with an "Access is denied" launch error from the packaged `rg.exe`, so prefer PowerShell-native search commands first:
   - File search: `Get-ChildItem -Recurse -File`
   - Text search: `Get-ChildItem ... | Select-String -Pattern ...`
